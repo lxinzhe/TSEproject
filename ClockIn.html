@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>UserMainPage</title>
+  <title>ClockIn</title>
   <style>
     * {
       box-sizing: border-box;
@@ -55,7 +55,20 @@
     .sidebar nav a:hover {
       background-color: #f0e6ff;
     }
-
+    .logout {
+      margin-top: 215%;
+      text-align: left;
+    }
+    .logout a {
+      color: #6a0dad;
+      text-decoration: none;
+      padding: 0.75rem;
+      border-radius: 5px;
+      transition: background 0.2s;
+    }
+    .logout a:hover {
+      background-color: #f0e6ff;
+    }
     .main {
       flex-grow: 1;
       padding: 2rem;
@@ -127,54 +140,73 @@
     <aside class="sidebar">
       <nav>
         <a href="UserMainPage.html">Dashboard</a>
-        <a href="#">View Records</a>
+        <a href="ViewRecords.html">View Records</a>
         <a href="#">Leave Form</a>
         <a href="#">OverTime Form</a>
-        <a href="#">Logout</a>
       </nav>
+      <div class="logout"><a href="#">Logout</a></div>
     </aside>
 
     <main class="main">
       <div class="button-group">
         <button onclick="location.href='ClockIn.html'">Clock In</button>
-        <button>Clock Out</button>
+        <button onclick="location.href='clockout.html'">Clock Out</button>
       </div>
 
       <div class="card">
         <h2>Mark Today's Clock In Attendance</h2>
         <form id="attendanceForm">
           <label for="employeeName">Name</label>
-          <input type="text" id="employeeName" placeholder="Enter your name" required>
+          <input type="text" id="employeeName" name="employeeName" placeholder="Enter your name" required>
       
           <label for="clockInTime">Clock In Time</label>
-          <input type="text" id="clockInTime" readonly>
+          <input type="text" id="clockInTime" name="clockInTime" readonly>
       
-          <button type="submit">Submit Attendance</button>
+          <input type="hidden" id="date" name="date"> <!-- Hidden field for date -->
+      
+          <button type="button" id="submitBtn">Submit Attendance</button>
         </form>
       </div>
     </main>
   </div>
 
+  <script>
+    function setClockInTime() {
+      const now = new Date();
+      const timeString = now.toTimeString().split(' ')[0]; // Format: HH:MM:SS
+      const dateString = now.toISOString().split('T')[0];  // Format: YYYY-MM-DD
+      document.getElementById("clockInTime").value = timeString;
+      document.getElementById("date").value = dateString;
+    }
+
+    window.onload = setClockInTime;
+
+    document.getElementById("submitBtn").addEventListener("click", function () {
+      const employeeName = document.getElementById("employeeName").value;
+      const clockInTime = document.getElementById("clockInTime").value;
+      const date = document.getElementById("date").value;
+
+      if (!employeeName) {
+        alert("Please enter your name!");
+        return;
+      }
+
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", "php/clockin.php", true);
+      xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+      xhr.onload = function () {
+        if (xhr.status === 200) {
+          alert("Attendance recorded successfully!");
+        } else {
+          alert("Error submitting attendance.");
+        }
+      };
+
+      const params = `employeeName=${encodeURIComponent(employeeName)}&clockInTime=${encodeURIComponent(clockInTime)}&date=${encodeURIComponent(date)}`;
+      xhr.send(params);
+    });
+  </script>
+
 </body>
 </html>
-
-<script>
-    // Function to capture real-time clock-in time
-    function setClockInTime() {
-      let now = new Date();
-      let timeString = now.toLocaleTimeString(); // Formats time like "2:30:45 PM"
-      document.getElementById("clockInTime").value = timeString;
-    }
-  
-    // Event Listener to set time when user clicks the submit button
-    document.getElementById("attendanceForm").addEventListener("submit", function(event) {
-      event.preventDefault(); // Prevents page reload
-      setClockInTime(); // Set time before submission
-  
-      // Here, you can send data to a server if needed
-      alert("Attendance submitted at: " + document.getElementById("clockInTime").value);
-    });
-  
-    // Automatically fill time field when the form loads
-    window.onload = setClockInTime;
-  </script>

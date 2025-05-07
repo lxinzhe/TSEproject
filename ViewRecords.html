@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>View Records</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background-color: #f8f7fc;
+      color: #333;
+    }
+
+    header {
+      background-color: #6a0dad;
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+
+    .container {
+      display: flex;
+      height: calc(100vh - 70px);
+    }
+
+    .sidebar {
+      width: 220px;
+      background-color: #ffffff;
+      border-right: 1px solid #ddd;
+      padding: 1rem;
+    }
+
+    .sidebar nav a {
+      display: block;
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      color: #6a0dad;
+      text-decoration: none;
+      border-radius: 5px;
+      transition: background 0.2s;
+    }
+
+    .sidebar nav a:hover {
+      background-color: #f0e6ff;
+    }
+
+    .logout {
+      margin-top: 215%;
+      text-align: left;
+    }
+
+    .logout a {
+      color: #6a0dad;
+      text-decoration: none;
+      padding: 0.75rem;
+      border-radius: 5px;
+      transition: background 0.2s;
+    }
+
+    .logout a:hover {
+      background-color: #f0e6ff;
+    }
+
+    .main {
+      flex-grow: 1;
+      padding: 2rem;
+    }
+
+    .card {
+      background-color: #fff;
+      padding: 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      margin-bottom: 2rem;
+    }
+
+    .card h2 {
+      color: #6a0dad;
+      margin-top: 0;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .button-group button {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      background-color: #6a0dad;
+      color: white;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .button-group button:hover {
+      background-color: #5a0bb2;
+    }
+
+    /* Table Styles */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 2rem;
+      display: none; /* Hidden by default */
+    }
+
+    table th, table td {
+      padding: 12px 15px;
+      text-align: center;
+      border: 1px solid #ddd;
+    }
+
+    table th {
+      background-color: #6a0dad;
+      color: white;
+    }
+
+    table td {
+      background-color: #f9f9f9;
+    }
+
+    table tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+
+    /* Hover effect */
+    table tr:hover {
+      background-color: #ddd;
+    }
+
+    .status-present {
+      color: green;
+    }
+
+    .status-absent {
+      color: red;
+    }
+
+    .total-days {
+      margin-bottom: 1rem;
+      font-size: 1.25rem;
+      font-weight: bold;
+      text-align: left;
+    }
+
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>🎮 GameHub Attendance</h1>
+    <div>Welcome, Employee</div>
+  </header>
+
+  <div class="container">
+    <aside class="sidebar">
+      <nav>
+        <a href="UserMainPage.html">Dashboard</a>
+        <a href="ViewRecords.html">View Records</a>
+        <a href="#">Leave Form</a>
+        <a href="#">OverTime Form</a>
+      </nav>
+      <div class="logout"><a href="#">Logout</a></div>
+    </aside>
+
+    <main class="main">
+      <div class="card">
+        <h2>Attendance Record</h2>
+
+        <div class="total-days">
+          <span>Total Days (In Current Month): 20</span>
+        </div>
+
+        <div class="button-group">
+          <button class="status-present" onclick="showTable('present')">Present</button>
+          <button class="status-absent" onclick="showTable('absent')">Absent</button>
+          <button class="status-present" onclick="showTable('status')">Status</button>
+        </div>
+
+        <!-- Present Table -->
+        <table id="present-table">
+          <thead>
+            <tr>
+              <th>Employee ID</th>
+              <th>Date</th>
+              <th>Clock In Time</th>
+              <th>Clock Out Time</th>
+              <th>Total Work Hours</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>John Doe</td>
+              <td>18</td>
+              <td class="status-present">Present</td>
+              <td>18</td>
+              <td>18</td>
+
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Absent Table -->
+        <table id="absent-table">
+          <thead>
+            <tr>
+              <th>Employee ID</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Jane Doe</td>
+              <td>2</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Status Table -->
+        <table id="status-table">
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <th>Date</th> 
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>John Doe</td>
+              <td>18</td>
+              <td class="status-present">Present</td>
+            </tr>
+            <tr>
+              <td>Jane Doe</td>
+              <td>2</td>
+              <td class="status-absent">Absent</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function showTable(tableName) {
+      // Hide all tables
+      document.getElementById('present-table').style.display = 'none';
+      document.getElementById('absent-table').style.display = 'none';
+      document.getElementById('status-table').style.display = 'none';
+
+      // Show the clicked table
+      if (tableName === 'present') {
+        document.getElementById('present-table').style.display = 'table';
+      } else if (tableName === 'absent') {
+        document.getElementById('absent-table').style.display = 'table';
+      } else if (tableName === 'status') {
+        document.getElementById('status-table').style.display = 'table';
+      }
+    }
+  </script>
+
+</body>
+</html>
