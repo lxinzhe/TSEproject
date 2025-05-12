@@ -147,7 +147,9 @@
     .status-present {
       color: green;
     }
-
+    .status-late {
+      color: orange;
+    } 
     .status-absent {
       color: red;
     }
@@ -184,7 +186,7 @@
         <h2>Attendance Record</h2>
 
         <div class="total-days">
-          <span>Total Days (In Current Month): 20</span>
+          <span id="total-days">Total Days (In Current Month): </span>
         </div>
 
         <div class="button-group">
@@ -204,16 +206,7 @@
               <th>Total Work Hours</th>
             </tr>
           </thead>
-          <tbody>
-            <tr>
-              <td>John Doe</td>
-              <td>18</td>
-              <td class="status-present">Present</td>
-              <td>18</td>
-              <td>18</td>
-
-            </tr>
-          </tbody>
+          <tbody id="present-body"></tbody>
         </table>
 
         <!-- Absent Table -->
@@ -224,56 +217,123 @@
               <th>Date</th>
             </tr>
           </thead>
-          <tbody>
-            <tr>
-              <td>Jane Doe</td>
-              <td>2</td>
-            </tr>
-          </tbody>
+          <tbody id="absent-body"></tbody>
         </table>
 
         <!-- Status Table -->
         <table id="status-table">
           <thead>
             <tr>
-              <th>Employee</th>
-              <th>Date</th> 
+              <th>Total Days</th>
               <th>Status</th>
             </tr>
           </thead>
-          <tbody>
-            <tr>
-              <td>John Doe</td>
-              <td>18</td>
-              <td class="status-present">Present</td>
-            </tr>
-            <tr>
-              <td>Jane Doe</td>
-              <td>2</td>
-              <td class="status-absent">Absent</td>
-            </tr>
-          </tbody>
+          <tbody id="status-body"></tbody>
         </table>
+
       </div>
     </main>
   </div>
 
   <script>
-    function showTable(tableName) {
-      // Hide all tables
-      document.getElementById('present-table').style.display = 'none';
-      document.getElementById('absent-table').style.display = 'none';
-      document.getElementById('status-table').style.display = 'none';
+// Function to update the Total Days dynamically based on the current date
+// Function to update the Total Days dynamically based on the current date
+function updateTotalDays() {
+  const today = new Date();
+  const totalDays = today.getDate(); // Get current day of the month
+  document.getElementById('total-days').textContent = `Total Days (In Current Month): ${totalDays}`;
+}
 
-      // Show the clicked table
-      if (tableName === 'present') {
-        document.getElementById('present-table').style.display = 'table';
-      } else if (tableName === 'absent') {
-        document.getElementById('absent-table').style.display = 'table';
-      } else if (tableName === 'status') {
-        document.getElementById('status-table').style.display = 'table';
-      }
-    }
+// Function to show the relevant table
+function showTable(tableName) {
+  // Hide all tables
+  document.getElementById('present-table').style.display = 'none';
+  document.getElementById('absent-table').style.display = 'none';
+  document.getElementById('status-table').style.display = 'none';
+
+  // Show the clicked table
+  if (tableName === 'present') {
+    document.getElementById('present-table').style.display = 'table';
+  } else if (tableName === 'absent') {
+    document.getElementById('absent-table').style.display = 'table';
+  } else if (tableName === 'status') {
+    document.getElementById('status-table').style.display = 'table';
+    fetchAttendanceData(); // Call to fetch the data when the status button is clicked
+  }
+}
+
+// Fetch attendance data from the server
+function fetchAttendanceData() {
+  fetch('php/attendance_detail.php')
+    .then(response => response.json())
+    .then(data => {
+      console.log(data); // Debugging: Log the data
+
+      // Initialize counters for Present, Late, and Absent
+      let presentCount = 0;
+      let lateCount = 0;
+      let absentCount = 0;
+
+      // Fill Present Table
+      const presentTableBody = document.getElementById('present-body');
+      presentTableBody.innerHTML = '';
+      data.present.forEach(record => {
+        const clockInTime = new Date(`1970-01-01T${record.ClockInTime}Z`); // Convert ClockInTime to Date object
+        const status = clockInTime > new Date('1970-01-01T09:00:00Z') ? 'Late' : 'Present'; // Check if the time is after 9:00 AM
+
+        // Update present and late counters
+        if (status === 'Present') {
+          presentCount++;
+        } else if (status === 'Late') {
+          lateCount++;
+        }
+
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${record.EmployeeID}</td><td>${record.Date}</td><td>${record.ClockInTime}</td><td>${record.ClockOutTime}</td><td>${record.TotalWorkHours}</td>`;
+        presentTableBody.appendChild(row);
+      });
+
+      // Calculate the total days in the current month
+      const totalDays = new Date().getDate(); // Get current day of the month
+
+      // Calculate absent count (total days - present days - late days)
+      absentCount = totalDays - presentCount - lateCount;
+
+      // Fill Absent Table
+      const absentTableBody = document.getElementById('absent-body');
+      absentTableBody.innerHTML = '';
+      data.absent.forEach(record => {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${record.EmployeeID}</td><td>${record.Date}</td>`;
+        absentTableBody.appendChild(row);
+      });
+
+      // Fill Status Table (Present, Late, and Absent counts)
+      const statusTableBody = document.getElementById('status-body');
+      statusTableBody.innerHTML = '';
+      
+      // Add Present Row
+      const presentRow = document.createElement('tr');
+      presentRow.innerHTML = `<td>${presentCount}</td><td class="status-present">Present</td>`;
+      statusTableBody.appendChild(presentRow);
+
+      // Add Late Row
+      const lateRow = document.createElement('tr');
+      lateRow.innerHTML = `<td>${lateCount}</td><td class="status-late">Present-Late</td>`;
+      statusTableBody.appendChild(lateRow);
+
+      // Add Absent Row
+      const absentRow = document.createElement('tr');
+      absentRow.innerHTML = `<td>${absentCount}</td><td class="status-absent">Absent</td>`;
+      statusTableBody.appendChild(absentRow);
+
+    })
+    .catch(error => console.error('Error fetching attendance data:', error));
+}
+
+// Call the functions when the page loads
+updateTotalDays();
+fetchAttendanceData();
   </script>
 
 </body>
