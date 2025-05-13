@@ -161,7 +161,24 @@
       text-align: left;
     }
 
+    /* Pie chart container */
+    #pie-chart-container {
+      margin-top: 2rem;
+      width: 100%;
+      height: 400px;
+    }
+
+    /* Dropdown for selecting month */
+    #month-select {
+      padding: 0.75rem;
+      border-radius: 5px;
+      font-size: 1rem;
+      margin-top: 1rem;
+    }
+
   </style>
+  <!-- Include Chart.js library -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -192,7 +209,31 @@
         <div class="button-group">
           <button class="status-present" onclick="showTable('present')">Present</button>
           <button class="status-absent" onclick="showTable('absent')">Absent</button>
-          <button class="status-present" onclick="showTable('status')">Status</button>
+          <button class="status-present" onclick="showTable('status')">Annual Attendance Status</button>
+        </div>
+
+        <!-- Status Section with Month Selector and Pie Chart -->
+        <div id="status-section" style="display: none;">
+          <!-- Month Selector -->
+          <select id="month-select" onchange="fetchMonthlyData()">
+            <option value="1">January</option>
+            <option value="2">February</option>
+            <option value="3">March</option>
+            <option value="4">April</option>
+            <option value="5">May</option>
+            <option value="6">June</option>
+            <option value="7">July</option>
+            <option value="8">August</option>
+            <option value="9">September</option>
+            <option value="10">October</option>
+            <option value="11">November</option>
+            <option value="12">December</option>
+          </select>
+
+          <!-- Pie Chart Container -->
+          <div id="pie-chart-container">
+            <canvas id="attendance-pie-chart"></canvas>
+          </div>
         </div>
 
         <!-- Present Table -->
@@ -220,28 +261,20 @@
           <tbody id="absent-body"></tbody>
         </table>
 
-        <!-- Status Table -->
-        <table id="status-table">
-          <thead>
-            <tr>
-              <th>Total Days</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="status-body"></tbody>
-        </table>
-
       </div>
     </main>
   </div>
 
   <script>
 // Function to update the Total Days dynamically based on the current date
-// Function to update the Total Days dynamically based on the current date
 function updateTotalDays() {
   const today = new Date();
   const totalDays = today.getDate(); // Get current day of the month
   document.getElementById('total-days').textContent = `Total Days (In Current Month): ${totalDays}`;
+  
+  // Set the current month in the dropdown
+  const currentMonth = today.getMonth() + 1; // JavaScript months are 0-based (0-11), so we add 1
+  document.getElementById('month-select').value = currentMonth;
 }
 
 // Function to show the relevant table
@@ -249,32 +282,77 @@ function showTable(tableName) {
   // Hide all tables
   document.getElementById('present-table').style.display = 'none';
   document.getElementById('absent-table').style.display = 'none';
-  document.getElementById('status-table').style.display = 'none';
+  document.getElementById('status-section').style.display = 'none'; // Hide the status section initially
 
   // Show the clicked table
   if (tableName === 'present') {
     document.getElementById('present-table').style.display = 'table';
+    fetchAttendanceData('present'); // Fetch data when the "Present" button is clicked
   } else if (tableName === 'absent') {
     document.getElementById('absent-table').style.display = 'table';
+    fetchAttendanceData('absent'); // Fetch data when the "Absent" button is clicked
   } else if (tableName === 'status') {
-    document.getElementById('status-table').style.display = 'table';
-    fetchAttendanceData(); // Call to fetch the data when the status button is clicked
+    document.getElementById('status-section').style.display = 'block'; // Show the status section
+    fetchMonthlyData(); // Fetch data when the "Status" button is clicked
   }
 }
 
-// Fetch attendance data from the server
-function fetchAttendanceData() {
-  fetch('php/attendance_detail.php')
+// Fetch data for present or absent
+function fetchAttendanceData(status) {
+  const month = document.getElementById('month-select').value;
+  
+  // Fetch data from PHP file based on status (Present or Absent)
+  fetch(`php/attendance_detail.php?month=${month}&status=${status}`)
     .then(response => response.json())
     .then(data => {
-      console.log(data); // Debugging: Log the data
+      console.log('Fetched data:', data); // Debugging: Log the fetched data
+      let presentCount = 0;
+      let lateCount = 0;
+      let absentCount = 0;
+
+      // Fill Present Table and calculate Late and Present
+      const tableBody = document.getElementById(status === 'present' ? 'present-body' : 'absent-body');
+      tableBody.innerHTML = '';
+
+      data[status].forEach(record => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${record.EmployeeID}</td>
+          <td>${record.Date}</td>
+          <td>${record.ClockInTime || 'N/A'}</td>
+          <td>${record.ClockOutTime || 'N/A'}</td>
+          <td>${record.TotalWorkHours || 'N/A'}</td>`;
+        tableBody.appendChild(row);
+      });
+
+    })
+    .catch(error => console.error('Error fetching attendance data:', error));
+}
+
+// Fetch monthly data and render the pie chart
+function fetchMonthlyData() {
+  const month = document.getElementById('month-select').value;
+
+  // Fetch attendance data from the PHP file
+  fetch(`php/attendance_detail.php?month=${month}`)
+    .then(response => response.json())
+    .then(data => {
+      console.log('Fetched data:', data); // Debugging: Log the fetched data
 
       // Initialize counters for Present, Late, and Absent
       let presentCount = 0;
       let lateCount = 0;
       let absentCount = 0;
 
-      // Fill Present Table
+      // Check if we have data for the selected month
+      if (data.present.length === 0 && data.absent.length === 0) {
+        // If no data for this month, mark all as absent
+        absentCount = new Date(new Date().getFullYear(), month, 0).getDate(); // Get total days of the selected month
+        renderPieChart(0, 0, absentCount); // Show all absent
+        return;
+      }
+
+      // Fill Present Table and calculate Late and Present
       const presentTableBody = document.getElementById('present-body');
       presentTableBody.innerHTML = '';
       data.present.forEach(record => {
@@ -294,7 +372,7 @@ function fetchAttendanceData() {
       });
 
       // Calculate the total days in the current month
-      const totalDays = new Date().getDate(); // Get current day of the month
+      const totalDays = new Date(new Date().getFullYear(), month, 0).getDate(); // Get total days of the selected month
 
       // Calculate absent count (total days - present days - late days)
       absentCount = totalDays - presentCount - lateCount;
@@ -308,32 +386,55 @@ function fetchAttendanceData() {
         absentTableBody.appendChild(row);
       });
 
-      // Fill Status Table (Present, Late, and Absent counts)
-      const statusTableBody = document.getElementById('status-body');
-      statusTableBody.innerHTML = '';
-      
-      // Add Present Row
-      const presentRow = document.createElement('tr');
-      presentRow.innerHTML = `<td>${presentCount}</td><td class="status-present">Present</td>`;
-      statusTableBody.appendChild(presentRow);
-
-      // Add Late Row
-      const lateRow = document.createElement('tr');
-      lateRow.innerHTML = `<td>${lateCount}</td><td class="status-late">Present-Late</td>`;
-      statusTableBody.appendChild(lateRow);
-
-      // Add Absent Row
-      const absentRow = document.createElement('tr');
-      absentRow.innerHTML = `<td>${absentCount}</td><td class="status-absent">Absent</td>`;
-      statusTableBody.appendChild(absentRow);
+      // Render the Pie Chart with the fetched data
+      renderPieChart(presentCount, lateCount, absentCount);
 
     })
-    .catch(error => console.error('Error fetching attendance data:', error));
+    .catch(error => console.error('Error fetching monthly attendance data:', error));
+}
+
+// Render the Pie Chart with the provided data
+let chartInstance = null; // Global variable to hold the chart instance
+
+function renderPieChart(present, late, absent) {
+  const ctx = document.getElementById('attendance-pie-chart').getContext('2d');
+
+  // If a chart instance already exists, destroy it
+  if (chartInstance) {
+    chartInstance.destroy();
+  }
+
+  // Create a new chart
+  chartInstance = new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: ['Present', 'Late', 'Absent'],
+      datasets: [{
+        data: [present, late, absent],
+        backgroundColor: ['#28a745', '#ffc107', '#dc3545'], // Green, Yellow, Red
+        hoverOffset: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'top',
+        },
+        tooltip: {
+          callbacks: {
+            label: function(tooltipItem) {
+              return tooltipItem.label + ': ' + tooltipItem.raw;
+            }
+          }
+        }
+      }
+    }
+  });
 }
 
 // Call the functions when the page loads
 updateTotalDays();
-fetchAttendanceData();
   </script>
 
 </body>
