@@ -1,50 +1,42 @@
 <?php
-// Include the database connection
 include('db_connect.php');
 
-// Get the selected month from the request
-$month = isset($_GET['month']) ? $_GET['month'] : date('m');
+$month = isset($_GET['month']) ? intval($_GET['month']) : intval(date('m'));
+$year = date('Y'); // Optionally get year from request or default to current year
 
-// Prepare the SQL query to fetch data from the attendance record table
-$sql = "SELECT EmployeeID, Date, ClockInTime, ClockOutTime, OvertimeHours, TotalWorkHours FROM attendancerecord WHERE MONTH(Date) = $month";
-$result = $conn->query($sql);
+// Prepare SQL to fetch attendance records for the selected month and year
+$sql = "SELECT EmployeeID, Date, ClockInTime, ClockOutTime, OvertimeHours, TotalWorkHours 
+        FROM attendancerecord 
+        WHERE MONTH(Date) = ? AND YEAR(Date) = ?";
 
-// Check if the query returns any results
-if ($result->num_rows > 0) {
-    $attendance = [
-        'present' => [],
-        'absent' => [],
-        'status' => []
-    ];
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("ii", $month, $year);
+$stmt->execute();
+$result = $stmt->get_result();
 
-    // Loop through the results and categorize them
-    while ($row = $result->fetch_assoc()) {
-        if ($row["ClockInTime"] != NULL && $row["ClockOutTime"] != NULL) {
-            // Employee is present
-            $attendance['present'][] = $row;
-        } else {
-            // Employee is absent
-            $attendance['absent'][] = $row;
-        }
+$attendance = [
+    'present' => [],
+    'absent' => [],  // This will remain empty; frontend calculates absent count
+    'status' => []
+];
 
-        // For status (can be based on TotalWorkHours or other business logic)
-        $status = 'Absent'; // Default status
-        if ($row["ClockInTime"] != NULL && $row["ClockOutTime"] != NULL) {
-            $status = 'Present';
-        } elseif ($row["OvertimeHours"] > 0) {
-            $status = 'Late';
-        }
-
-        $attendance['status'][] = ['EmployeeID' => $row['EmployeeID'], 'Date' => $row['Date'], 'Status' => $status];
+while ($row = $result->fetch_assoc()) {
+    // Only consider records with both ClockInTime and ClockOutTime as present/late
+    if ($row['ClockInTime'] !== NULL && $row['ClockOutTime'] !== NULL) {
+        $attendance['present'][] = $row;
+        // Status is determined by frontend clock-in time comparison, so keep simple here
+        $attendance['status'][] = [
+            'EmployeeID' => $row['EmployeeID'],
+            'Date' => $row['Date'],
+            'Status' => 'Present' // frontend will decide late/present based on time
+        ];
     }
-
-    // Output the data as a JSON response
-    echo json_encode($attendance);
-} else {
-    // If no data is found, return an empty result
-    echo json_encode(['present' => [], 'absent' => [], 'status' => []]);
+    // Records with missing ClockInTime or ClockOutTime are ignored (not considered present)
+    // Absent days are those with no record for the day, handled on frontend
 }
 
-// Close the database connection
+$stmt->close();
 $conn->close();
-?>
+
+header('Content-Type: application/json');
+echo json_encode($attendance);

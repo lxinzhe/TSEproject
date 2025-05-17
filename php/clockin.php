@@ -1,6 +1,36 @@
 <?php
 include 'db_connect.php';
 
+if ($_SERVER["REQUEST_METHOD"] == "GET") {
+    // Check if user already clocked in today
+    $employeeName = $_GET['employeeName'] ?? '';
+    $date = $_GET['date'] ?? '';
+
+    header('Content-Type: application/json');
+
+    if (empty($employeeName) || empty($date)) {
+        echo json_encode(['clockedIn' => false]);
+        exit;
+    }
+
+    // Prepare statement to check if record exists for user and date
+    $stmt = $conn->prepare("SELECT COUNT(*) FROM attendancerecord WHERE Name = ? AND Date = ?");
+    if ($stmt === false) {
+        echo json_encode(['clockedIn' => false]);
+        exit;
+    }
+    $stmt->bind_param("ss", $employeeName, $date);
+    $stmt->execute();
+    $stmt->bind_result($count);
+    $stmt->fetch();
+    $stmt->close();
+
+    // If count > 0, user already clocked in today
+    $clockedIn = ($count > 0);
+    echo json_encode(['clockedIn' => $clockedIn]);
+    exit;
+}
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $employeeName = $_POST['employeeName'] ?? '';
     $clockInTime = $_POST['clockInTime'] ?? '';
@@ -13,13 +43,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // TEMP: Simulate mapping name to EmployeeID
-    // In real app, you'd use session or query the database to get EmployeeID by name
     $employeeID = 1;
 
-    // Use correct time format for database
+    // Format time properly
     $time = date("H:i:s", strtotime($clockInTime));
 
-    // Update SQL query to include 'Name'
     $stmt = $conn->prepare("INSERT INTO attendancerecord (Name, EmployeeID, Date, ClockInTime) VALUES (?, ?, ?, ?)");
     if ($stmt === false) {
         http_response_code(500);
@@ -38,5 +66,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $stmt->close();
     $conn->close();
+    exit;
 }
+
+// For other methods, return 405 Method Not Allowed
+http_response_code(405);
+echo "Method not allowed";
+exit;
 ?>

@@ -176,256 +176,375 @@
       margin-top: 1rem;
     }
 
+  .pagination-controls {
+      margin-top: 30px;
+      text-align: center;
+      font-weight: bold;
+    }
+    .pagination-controls button {
+      margin: 0 5px;
+      padding: 5px 90px;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      background-color: #6a0dad;
+      color: white;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+    .pagination-controls button:hover:not(:disabled) {
+      background-color: #5a0bb2;
+    }
+    .pagination-controls button:disabled {
+      background-color: #aaa;
+      cursor: not-allowed;
+      color: #eee;
+    }
+    .pagination-info {
+      display: inline-block;
+      padding: 0px 300px;
+      font-weight: normal;
+      color: #333;
+    }
   </style>
-  <!-- Include Chart.js library -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
-  <header>
-    <h1>🎮 GameHub Attendance</h1>
-    <div>Welcome, Employee</div>
-  </header>
+<header>
+  <h1>🎮 GameHub Attendance</h1>
+  <div>Welcome, Employee</div>
+</header>
 
-  <div class="container">
-    <aside class="sidebar">
-      <nav>
-        <a href="UserMainPage.html">Dashboard</a>
-        <a href="ViewRecords.html">View Records</a>
-        <a href="#">Leave Form</a>
-        <a href="#">OverTime Form</a>
-      </nav>
-      <div class="logout"><a href="#">Logout</a></div>
-    </aside>
+<div class="container">
+  <aside class="sidebar">
+    <nav>
+      <a href="UserMainPage.html">Dashboard</a>
+      <a href="ViewRecords.html">View Records</a>
+      <a href="#">Leave Form</a>
+      <a href="#">OverTime Form</a>
+    </nav>
+    <div class="logout"><a href="#">Logout</a></div>
+  </aside>
 
-    <main class="main">
-      <div class="card">
-        <h2>Attendance Record</h2>
+  <main class="main">
+    <div class="card">
+      <h2>Attendance Record</h2>
 
-        <div class="total-days">
-          <span id="total-days">Total Days (In Current Month): </span>
-        </div>
-
-        <div class="button-group">
-          <button class="status-present" onclick="showTable('present')">Present</button>
-          <button class="status-absent" onclick="showTable('absent')">Absent</button>
-          <button class="status-present" onclick="showTable('status')">Annual Attendance Status</button>
-        </div>
-
-        <!-- Status Section with Month Selector and Pie Chart -->
-        <div id="status-section" style="display: none;">
-          <!-- Month Selector -->
-          <select id="month-select" onchange="fetchMonthlyData()">
-            <option value="1">January</option>
-            <option value="2">February</option>
-            <option value="3">March</option>
-            <option value="4">April</option>
-            <option value="5">May</option>
-            <option value="6">June</option>
-            <option value="7">July</option>
-            <option value="8">August</option>
-            <option value="9">September</option>
-            <option value="10">October</option>
-            <option value="11">November</option>
-            <option value="12">December</option>
-          </select>
-
-          <!-- Pie Chart Container -->
-          <div id="pie-chart-container">
-            <canvas id="attendance-pie-chart"></canvas>
-          </div>
-        </div>
-
-        <!-- Present Table -->
-        <table id="present-table">
-          <thead>
-            <tr>
-              <th>Employee ID</th>
-              <th>Date</th>
-              <th>Clock In Time</th>
-              <th>Clock Out Time</th>
-              <th>Total Work Hours</th>
-            </tr>
-          </thead>
-          <tbody id="present-body"></tbody>
-        </table>
-
-        <!-- Absent Table -->
-        <table id="absent-table">
-          <thead>
-            <tr>
-              <th>Employee ID</th>
-              <th>Date</th>
-            </tr>
-          </thead>
-          <tbody id="absent-body"></tbody>
-        </table>
-
+      <div class="total-days">
+        <span id="total-days">Total Days (In Current Month): </span>
       </div>
-    </main>
-  </div>
 
-  <script>
-// Function to update the Total Days dynamically based on the current date
+      <div class="button-group">
+        <button class="status-present" onclick="showTable('present')">Present</button>
+        <button class="status-absent" onclick="showTable('absent')">Absent</button>
+        <button class="status-present" onclick="showTable('status')">Annual Attendance Status</button>
+      </div>
+
+      <div id="status-section" style="display: none;">
+        <select id="month-select" onchange="monthChanged()">
+          <option value="1">January</option>
+          <option value="2">February</option>
+          <option value="3">March</option>
+          <option value="4">April</option>
+          <option value="5">May</option>
+          <option value="6">June</option>
+          <option value="7">July</option>
+          <option value="8">August</option>
+          <option value="9">September</option>
+          <option value="10">October</option>
+          <option value="11">November</option>
+          <option value="12">December</option>
+        </select>
+
+        <div id="pie-chart-container">
+          <canvas id="attendance-pie-chart"></canvas>
+        </div>
+      </div>
+
+      <table id="present-table">
+        <thead>
+          <tr>
+            <th>Employee ID</th>
+            <th>Date</th>
+            <th>Clock In Time</th>
+            <th>Clock Out Time</th>
+            <th>Total Work Hours</th>
+          </tr>
+        </thead>
+        <tbody id="present-body"></tbody>
+      </table>
+      <div id="present-pagination" class="pagination-controls"></div>
+
+      <table id="absent-table">
+        <thead>
+          <tr>
+            <th>Employee ID</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody id="absent-body"></tbody>
+      </table>
+      <div id="absent-pagination" class="pagination-controls"></div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+const rowsPerPage = 5;
+let currentPagePresent = 1;
+let currentPageAbsent = 1;
+
+const monthNames = ["January", "February", "March", "April", "May", "June",
+                    "July", "August", "September", "October", "November", "December"];
+
 function updateTotalDays() {
   const today = new Date();
-  const totalDays = today.getDate(); // Get current day of the month
-  document.getElementById('total-days').textContent = `Total Days (In Current Month): ${totalDays}`;
-  
-  // Set the current month in the dropdown
-  const currentMonth = today.getMonth() + 1; // JavaScript months are 0-based (0-11), so we add 1
-  document.getElementById('month-select').value = currentMonth;
-}
+  const currentMonth = today.getMonth() + 1;
+  const year = today.getFullYear();
 
-// Function to show the relevant table
-function showTable(tableName) {
-  // Hide all tables
-  document.getElementById('present-table').style.display = 'none';
-  document.getElementById('absent-table').style.display = 'none';
-  document.getElementById('status-section').style.display = 'none'; // Hide the status section initially
+  const selectedMonth = parseInt(document.getElementById('month-select').value);
+  const totalDaysInMonth = new Date(year, selectedMonth, 0).getDate();
 
-  // Show the clicked table
-  if (tableName === 'present') {
-    document.getElementById('present-table').style.display = 'table';
-    fetchAttendanceData('present'); // Fetch data when the "Present" button is clicked
-  } else if (tableName === 'absent') {
-    document.getElementById('absent-table').style.display = 'table';
-    fetchAttendanceData('absent'); // Fetch data when the "Absent" button is clicked
-  } else if (tableName === 'status') {
-    document.getElementById('status-section').style.display = 'block'; // Show the status section
-    fetchMonthlyData(); // Fetch data when the "Status" button is clicked
+  if (selectedMonth === currentMonth) {
+    document.getElementById('total-days').textContent = 
+      `Total Days (In Current Month So Far): ${today.getDate()}`;
+  } else {
+    document.getElementById('total-days').textContent = 
+      `Total Days (In Selected Month - ${monthNames[selectedMonth - 1]}): ${totalDaysInMonth}`;
   }
 }
 
-// Fetch data for present or absent
-function fetchAttendanceData(status) {
-  const month = document.getElementById('month-select').value;
-  
-  // Fetch data from PHP file based on status (Present or Absent)
-  fetch(`php/attendance_detail.php?month=${month}&status=${status}`)
-    .then(response => response.json())
-    .then(data => {
-      console.log('Fetched data:', data); // Debugging: Log the fetched data
-      let presentCount = 0;
-      let lateCount = 0;
-      let absentCount = 0;
+function showTable(tableName) {
+  document.getElementById('present-table').style.display = 'none';
+  document.getElementById('absent-table').style.display = 'none';
+  document.getElementById('status-section').style.display = 'none';
 
-      // Fill Present Table and calculate Late and Present
-      const tableBody = document.getElementById(status === 'present' ? 'present-body' : 'absent-body');
-      tableBody.innerHTML = '';
-
-      data[status].forEach(record => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${record.EmployeeID}</td>
-          <td>${record.Date}</td>
-          <td>${record.ClockInTime || 'N/A'}</td>
-          <td>${record.ClockOutTime || 'N/A'}</td>
-          <td>${record.TotalWorkHours || 'N/A'}</td>`;
-        tableBody.appendChild(row);
-      });
-
-    })
-    .catch(error => console.error('Error fetching attendance data:', error));
+  if (tableName === 'present') {
+    document.getElementById('present-table').style.display = 'table';
+    document.getElementById('present-pagination').style.display = 'block';
+    document.getElementById('absent-pagination').style.display = 'none';
+    currentPagePresent = 1;
+    fetchAttendanceData('present');
+  } else if (tableName === 'absent') {
+    document.getElementById('absent-table').style.display = 'table';
+    document.getElementById('absent-pagination').style.display = 'block';
+    document.getElementById('present-pagination').style.display = 'none';
+    currentPageAbsent = 1;
+    fetchAttendanceData('absent');
+  } else if (tableName === 'status') {
+    document.getElementById('status-section').style.display = 'block';
+    document.getElementById('present-pagination').style.display = 'none';
+    document.getElementById('absent-pagination').style.display = 'none';
+    fetchMonthlyData();
+  }
 }
 
-// Fetch monthly data and render the pie chart
-function fetchMonthlyData() {
+// Call this when month is changed
+function monthChanged(){
+  updateTotalDays();
+  // Show present table by default when month changes
+  showTable('present');
+}
+
+function fetchAttendanceData(status) {
   const month = document.getElementById('month-select').value;
 
-  // Fetch attendance data from the PHP file
-  fetch(`php/attendance_detail.php?month=${month}`)
-    .then(response => response.json())
+  fetch(`php/attendance_detail.php?month=${month}&status=${status}`)
+    .then(res => res.json())
     .then(data => {
-      console.log('Fetched data:', data); // Debugging: Log the fetched data
+      if (status === 'present') {
+        paginateAndRender(data.present, 'present');
+      } else {
+        calculateAbsentDatesAndRender(data.present, data.absent);
+      }
+    })
+    .catch(err => console.error('Error fetching attendance data:', err));
+}
 
-      // Initialize counters for Present, Late, and Absent
+function calculateAbsentDatesAndRender(presentRecords, absentRecords) {
+  const month = parseInt(document.getElementById('month-select').value);
+  const today = new Date();
+  const year = today.getFullYear();
+
+  const currentMonth = today.getMonth() + 1;
+  let totalDays;
+  if (month === currentMonth) totalDays = today.getDate();
+  else totalDays = new Date(year, month, 0).getDate();
+
+  // Dates of present & late days from presentRecords
+  const presentDatesSet = new Set(presentRecords.map(r => r.Date));
+
+  // Generate all dates in the month up to totalDays
+  let allDates = [];
+  for (let d = 1; d <= totalDays; d++) {
+    const dayStr = d.toString().padStart(2, '0');
+    const monthStr = month.toString().padStart(2, '0');
+    const dateStr = `${year}-${monthStr}-${dayStr}`;
+    allDates.push(dateStr);
+  }
+
+  // Absent dates = allDates minus presentDates
+  const absentDates = allDates.filter(date => !presentDatesSet.has(date));
+
+  // Map absent dates to display objects with dummy EmployeeID '-'
+  const absentDataForDisplay = absentDates.map(d => ({ EmployeeID: '1', Date: d }));
+
+  // Sort descending for display
+  absentDataForDisplay.sort((a, b) => new Date(b.Date) - new Date(a.Date));
+
+  paginateAndRender(absentDataForDisplay, 'absent');
+}
+
+function paginateAndRender(records, status) {
+  // Ensure sorted descending by Date
+  records.sort((a, b) => new Date(b.Date) - new Date(a.Date));
+
+  const tableBody = document.getElementById(status === 'present' ? 'present-body' : 'absent-body');
+  const paginationDiv = document.getElementById(status === 'present' ? 'present-pagination' : 'absent-pagination');
+
+  let currentPage = status === 'present' ? currentPagePresent : currentPageAbsent;
+  const totalPages = Math.ceil(records.length / rowsPerPage);
+
+  if (currentPage > totalPages) currentPage = totalPages;
+  if (currentPage < 1) currentPage = 1;
+
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const pageRecords = records.slice(startIndex, endIndex);
+
+  tableBody.innerHTML = '';
+
+  pageRecords.forEach(record => {
+    const row = document.createElement('tr');
+    if (status === 'present') {
+      row.innerHTML = `
+        <td>${record.EmployeeID}</td>
+        <td>${record.Date}</td>
+        <td>${record.ClockInTime || 'N/A'}</td>
+        <td>${record.ClockOutTime || 'N/A'}</td>
+        <td>${record.TotalWorkHours || 'N/A'}</td>
+      `;
+    } else {
+      row.innerHTML = `
+        <td>${record.EmployeeID}</td>
+        <td>${record.Date}</td>
+      `;
+    }
+    tableBody.appendChild(row);
+  });
+
+  paginationDiv.innerHTML = '';
+
+  const prevBtn = document.createElement('button');
+  prevBtn.textContent = 'Previous';
+  prevBtn.disabled = currentPage === 1;
+  prevBtn.onclick = () => {
+    if (status === 'present') {
+      currentPagePresent--;
+      paginateAndRender(records, 'present');
+    } else {
+      currentPageAbsent--;
+      paginateAndRender(records, 'absent');
+    }
+  };
+  paginationDiv.appendChild(prevBtn);
+
+  const pageInfo = document.createElement('span');
+  pageInfo.className = 'pagination-info';
+  pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+  paginationDiv.appendChild(pageInfo);
+
+  const nextBtn = document.createElement('button');
+  nextBtn.textContent = 'Next';
+  nextBtn.disabled = currentPage === totalPages;
+  nextBtn.onclick = () => {
+    if (status === 'present') {
+      currentPagePresent++;
+      paginateAndRender(records, 'present');
+    } else {
+      currentPageAbsent++;
+      paginateAndRender(records, 'absent');
+    }
+  };
+  paginationDiv.appendChild(nextBtn);
+
+  if (status === 'present') currentPagePresent = currentPage;
+  else currentPageAbsent = currentPage;
+}
+
+function fetchMonthlyData() {
+  const month = parseInt(document.getElementById('month-select').value);
+  const today = new Date();
+  const year = today.getFullYear();
+
+  fetch(`php/attendance_detail.php?month=${month}`)
+    .then(res => res.json())
+    .then(data => {
       let presentCount = 0;
       let lateCount = 0;
       let absentCount = 0;
 
-      // Check if we have data for the selected month
-      if (data.present.length === 0 && data.absent.length === 0) {
-        // If no data for this month, mark all as absent
-        absentCount = new Date(new Date().getFullYear(), month, 0).getDate(); // Get total days of the selected month
-        renderPieChart(0, 0, absentCount); // Show all absent
+      const currentMonth = today.getMonth() + 1;
+      let totalDays;
+      if (month === currentMonth) {
+        totalDays = today.getDate();
+      } else {
+        totalDays = new Date(year, month, 0).getDate();
+      }
+
+      if ((!data.present || data.present.length === 0) && (!data.absent || data.absent.length === 0)) {
+        absentCount = totalDays;
+        renderPieChart(0, 0, absentCount);
         return;
       }
 
-      // Fill Present Table and calculate Late and Present
-      const presentTableBody = document.getElementById('present-body');
-      presentTableBody.innerHTML = '';
       data.present.forEach(record => {
-        const clockInTime = new Date(`1970-01-01T${record.ClockInTime}Z`); // Convert ClockInTime to Date object
-        const status = clockInTime > new Date('1970-01-01T09:00:00Z') ? 'Late' : 'Present'; // Check if the time is after 9:00 AM
-
-        // Update present and late counters
-        if (status === 'Present') {
-          presentCount++;
-        } else if (status === 'Late') {
-          lateCount++;
-        }
-
-        const row = document.createElement('tr');
-        row.innerHTML = `<td>${record.EmployeeID}</td><td>${record.Date}</td><td>${record.ClockInTime}</td><td>${record.ClockOutTime}</td><td>${record.TotalWorkHours}</td>`;
-        presentTableBody.appendChild(row);
+        const clockInTime = new Date(`1970-01-01T${record.ClockInTime}Z`);
+        const lateThreshold = new Date('1970-01-01T09:00:00Z');
+        if (clockInTime > lateThreshold) lateCount++;
+        else presentCount++;
       });
 
-      // Calculate the total days in the current month
-      const totalDays = new Date(new Date().getFullYear(), month, 0).getDate(); // Get total days of the selected month
-
-      // Calculate absent count (total days - present days - late days)
       absentCount = totalDays - presentCount - lateCount;
 
-      // Fill Absent Table
-      const absentTableBody = document.getElementById('absent-body');
-      absentTableBody.innerHTML = '';
-      data.absent.forEach(record => {
-        const row = document.createElement('tr');
-        row.innerHTML = `<td>${record.EmployeeID}</td><td>${record.Date}</td>`;
-        absentTableBody.appendChild(row);
-      });
+      if (month === currentMonth) {
+        document.getElementById('total-days').textContent =
+          `Total Days (In Current Month So Far): ${totalDays}`;
+      } else {
+        document.getElementById('total-days').textContent =
+          `Total Days (In Selected Month - ${monthNames[month - 1]}): ${totalDays}`;
+      }
 
-      // Render the Pie Chart with the fetched data
       renderPieChart(presentCount, lateCount, absentCount);
-
     })
-    .catch(error => console.error('Error fetching monthly attendance data:', error));
+    .catch(err => console.error('Error fetching monthly data:', err));
 }
 
-// Render the Pie Chart with the provided data
-let chartInstance = null; // Global variable to hold the chart instance
-
+let chartInstance = null;
 function renderPieChart(present, late, absent) {
   const ctx = document.getElementById('attendance-pie-chart').getContext('2d');
 
-  // If a chart instance already exists, destroy it
-  if (chartInstance) {
-    chartInstance.destroy();
-  }
+  if (chartInstance) chartInstance.destroy();
 
-  // Create a new chart
   chartInstance = new Chart(ctx, {
     type: 'pie',
     data: {
       labels: ['Present', 'Late', 'Absent'],
       datasets: [{
         data: [present, late, absent],
-        backgroundColor: ['#28a745', '#ffc107', '#dc3545'], // Green, Yellow, Red
+        backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
         hoverOffset: 4
       }]
     },
     options: {
       responsive: true,
       plugins: {
-        legend: {
-          position: 'top',
-        },
+        legend: { position: 'top' },
         tooltip: {
           callbacks: {
-            label: function(tooltipItem) {
-              return tooltipItem.label + ': ' + tooltipItem.raw;
-            }
+            label: (ctx) => `${ctx.label}: ${ctx.raw}`
           }
         }
       }
@@ -433,9 +552,16 @@ function renderPieChart(present, late, absent) {
   });
 }
 
-// Call the functions when the page loads
-updateTotalDays();
-  </script>
+// Set default month to current month and load data on page load
+window.onload = () => {
+  const today = new Date();
+  const currentMonth = today.getMonth() + 1;
+  document.getElementById('month-select').value = currentMonth;
+  updateTotalDays();
+  showTable('present');
+};
+
+</script>
 
 </body>
 </html>

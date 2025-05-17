@@ -1,58 +1,104 @@
 <?php
 include 'db_connect.php';
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $employeeName = $_POST['employeeName'] ?? '';
-    $clockOutTime = $_POST['clockOutTime'] ?? '';
-    $date = $_POST['date'] ?? '';
+header('Content-Type: application/json');
 
-    if (empty($employeeName) || empty($clockOutTime) || empty($date)) {
-        http_response_code(400);
-        echo "Missing required data.";
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    $employeeName = $_GET['employeeName'] ?? '';
+    $date = $_GET['date'] ?? '';
+
+    if (empty($employeeName) || empty($date)) {
+        echo json_encode(['clockedOut' => false]);
         exit;
     }
 
-    // Simulate mapping name to EmployeeID (use session or query database for real applications)
-    $employeeID = 1;
-
-    // Get the ClockInTime from the database for the employee
-    $stmt = $conn->prepare("SELECT ClockInTime FROM attendancerecord WHERE EmployeeID = ? AND ClockOutTime IS NULL ORDER BY RecordID DESC LIMIT 1");
-    $stmt->bind_param("i", $employeeID);
+    // Check if user has already clocked out today
+    $stmt = $conn->prepare("SELECT COUNT(*) FROM attendancerecord WHERE Name = ? AND Date = ? AND ClockOutTime IS NOT NULL");
+    if ($stmt === false) {
+        echo json_encode(['clockedOut' => false]);
+        exit;
+    }
+    $stmt->bind_param("ss", $employeeName, $date);
     $stmt->execute();
-    $stmt->bind_result($clockInTime);
+    $stmt->bind_result($count);
     $stmt->fetch();
     $stmt->close();
 
-    if (!$clockInTime) {
-        echo "No clock-in record found for this employee.";
+    $clockedOut = ($count > 0);
+    echo json_encode(['clockedOut' => $clockedOut]);
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $employeeName = $_POST['employeeName'] ?? '';
+    $clockOutTimeRaw = $_POST['clockOutTime'] ?? '';
+    $date = $_POST['date'] ?? '';
+
+    if (empty($employeeName) || empty($clockOutTimeRaw) || empty($date)) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Missing required data.']);
         exit;
     }
 
-    // Convert ClockInTime and ClockOutTime to DateTime objects
-    $clockInTime = DateTime::createFromFormat('H:i:s', $clockInTime);
-    $clockOutTime = DateTime::createFromFormat('H:i:s', $clockOutTime);
+    // Simulate employee ID mapping (adjust as needed)
+    $employeeID = 1;
 
-    // Calculate TotalWorkHours
-    $interval = $clockInTime->diff($clockOutTime);
-    $totalWorkHours = $interval->h + ($interval->i / 60); // Calculate hours as float
+    // Get the latest clock-in record without clock out time for this user on this date
+    $stmt = $conn->prepare("SELECT RecordID, ClockInTime FROM attendancerecord WHERE Name = ? AND Date = ? AND ClockOutTime IS NULL ORDER BY RecordID DESC LIMIT 1");
+    if ($stmt === false) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Prepare failed: ' . $conn->error]);
+        exit;
+    }
+    $stmt->bind_param("ss", $employeeName, $date);
+    $stmt->execute();
+    $stmt->bind_result($recordID, $clockInTime);
+    if (!$stmt->fetch()) {
+        http_response_code(400);
+        echo json_encode(['error' => 'No clock-in record found to clock out.']);
+        $stmt->close();
+        exit;
+    }
+    $stmt->close();
 
-    // Format ClockOutTime for storage
-    $formattedClockOutTime = $clockOutTime->format('H:i:s');
+    // Parse times
+    $clockInDT = DateTime::createFromFormat('H:i:s', $clockInTime);
+    $clockOutDT = DateTime::createFromFormat('H:i:s', $clockOutTimeRaw);
+    if (!$clockInDT || !$clockOutDT) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Invalid time format.']);
+        exit;
+    }
 
-    // Update ClockOutTime and TotalWorkHours for the employee's most recent clock-in
-    $stmt = $conn->prepare("UPDATE attendancerecord SET ClockOutTime = ?, TotalWorkHours = ? WHERE EmployeeID = ? AND ClockOutTime IS NULL");
-    
-    // Here we use only 3 bind parameters: ClockOutTime, TotalWorkHours, and EmployeeID
-    $stmt->bind_param("sdi", $formattedClockOutTime, $totalWorkHours, $employeeID);
+    // Calculate total work hours (decimal)
+    $interval = $clockInDT->diff($clockOutDT);
+    $totalHours = $interval->h + ($interval->i / 60);
+
+    // Format clock out time
+    $clockOutTime = $clockOutDT->format('H:i:s');
+
+    // Update record with clock out time and total work hours
+    $stmt = $conn->prepare("UPDATE attendancerecord SET ClockOutTime = ?, TotalWorkHours = ? WHERE RecordID = ?");
+    if ($stmt === false) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Prepare failed: ' . $conn->error]);
+        exit;
+    }
+    $stmt->bind_param("sdi", $clockOutTime, $totalHours, $recordID);
 
     if ($stmt->execute()) {
-        echo "Clock-out time recorded successfully.";
+        echo json_encode(['success' => 'Clock-out time recorded successfully.']);
     } else {
         http_response_code(500);
-        echo "Error recording clock-out time: " . $stmt->error;
+        echo json_encode(['error' => 'Execute failed: ' . $stmt->error]);
     }
 
     $stmt->close();
     $conn->close();
+    exit;
 }
+
+http_response_code(405);
+echo json_encode(['error' => 'Method not allowed']);
+exit;
 ?>

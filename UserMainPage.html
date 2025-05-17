@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>UserMainPage</title>
   <style>
     * {
@@ -55,10 +55,12 @@
     .sidebar nav a:hover {
       background-color: #f0e6ff;
     }
+
     .logout {
       margin-top: 215%;
       text-align: left;
     }
+
     .logout a {
       color: #6a0dad;
       text-decoration: none;
@@ -66,34 +68,30 @@
       border-radius: 5px;
       transition: background 0.2s;
     }
+
     .logout a:hover {
       background-color: #f0e6ff;
     }
+
     .main {
       flex-grow: 1;
       padding: 2rem;
-    }
-
-    .card {
-      background-color: #fff;
-      padding: 1.5rem;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-      margin-bottom: 2rem;
-    }
-
-    .card h2 {
-      color: #6a0dad;
-      margin-top: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
     .button-group {
       display: flex;
       gap: 1rem;
-      margin-bottom: 1rem;
+      margin-bottom: 2rem;
+      width: 100%;
+      max-width: 400px;
+      justify-content: center;
     }
 
     .button-group button {
+      flex-grow: 1;
       padding: 0.75rem 1.5rem;
       border: none;
       background-color: #6a0dad;
@@ -108,59 +106,135 @@
       background-color: #5a0bb2;
     }
 
-    form input, form select, form button {
+    .card {
+      background-color: #fff;
+      padding: 3rem 3rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(106, 13, 173, 0.2);
+      max-width: 800px;
       width: 100%;
-      padding: 0.75rem;
-      margin-top: 0.5rem;
+      text-align: center;
+    }
+
+    .card h2 {
+      color: #6a0dad;
+      margin-top: 0;
+      margin-bottom: 1.5rem;
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 1.15rem;
       margin-bottom: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 6px;
+      font-weight: 600;
+      color: #444;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 0.4rem;
     }
 
-    form button {
-      background-color: #6a0dad;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
+    .summary-row span:first-child {
+      color: #6a0dad;
     }
 
-    form button:hover {
-      background-color: #5a0bb2;
+    .summary-row span.value {
+      color: #222;
+      font-weight: 700;
+    }
+
+    /* Loader styling */
+    #loading {
+      font-size: 1.2rem;
+      color: #6a0dad;
+      margin-top: 1rem;
+      display: none;
     }
   </style>
 </head>
 <body>
 
-  <header>
-    <h1>🎮 GameHub Attendance</h1>
-    <div>Welcome, Employee</div>
-  </header>
+<header>
+  <h1>🎮 GameHub Attendance</h1>
+  <div>Welcome, Employee</div>
+</header>
 
-  <div class="container">
-    <aside class="sidebar">
-      <nav>
-        <a href="UserMainPage.html">Dashboard</a>
-        <a href="ViewRecords.html">View Records</a>
-        <a href="#">Leave Form</a>
-        <a href="#">OverTime Form</a>
-      </nav>
-      <div class="logout"><a href="#">Logout</a></div>
-    </aside>
+<div class="container">
+  <aside class="sidebar">
+    <nav>
+      <a href="UserMainPage.html">Dashboard</a>
+      <a href="ViewRecords.html">View Records</a>
+      <a href="#">Leave Form</a>
+      <a href="#">OverTime Form</a>
+    </nav>
+    <div class="logout"><a href="#">Logout</a></div>
+  </aside>
 
-    <main class="main">
-      <div class="button-group">
-        <button onclick="location.href='ClockIn.html'">Clock In</button>
-        <button onclick="location.href='ClockOut.html'">Clock Out</button>
+  <main class="main">
+    <div class="button-group">
+      <button onclick="location.href='ClockIn.html'">Clock In</button>
+      <button onclick="location.href='ClockOut.html'">Clock Out</button>
+    </div>
+
+    <div class="card" aria-live="polite" aria-busy="false" role="region">
+      <h2>Attendance Summary</h2>
+
+      <div id="loading">Loading attendance data...</div>
+
+      <div id="summary-content" style="display:none;">
+        <div class="summary-row">
+          <span>Total Days (Current Month So Far):</span>
+          <span class="value" id="total-days">--</span>
+        </div>
+        <div class="summary-row">
+          <span>Present Days:</span>
+          <span class="value" id="present-days">--</span>
+        </div>
+        <div class="summary-row">
+          <span>Late Days:</span>
+          <span class="value" id="late-days">--</span>
+        </div>
+        <div class="summary-row">
+          <span>Absent Days:</span>
+          <span class="value" id="absent-days">--</span>
+        </div>
       </div>
+    </div>
+  </main>
+</div>
 
-      <div class="card">
-        <h2>Attendance Summary</h2>
-        <p>Total Days (in current month): 22</p>
-        <p>Present: 20</p>
-        <p>Absent: 2</p>
-      </div>
-    </main>
-  </div>
+<script>
+  async function fetchAttendanceSummary() {
+    const loadingEl = document.getElementById('loading');
+    const summaryContent = document.getElementById('summary-content');
+    loadingEl.style.display = 'block';
+    summaryContent.style.display = 'none';
+
+    try {
+      // Adjust your API endpoint as needed
+      const response = await fetch('php/attendance_summary.php');
+      if (!response.ok) throw new Error('Network response was not ok');
+      const data = await response.json();
+
+      // Update the UI
+      document.getElementById('total-days').textContent = data.totalDays ?? '--';
+      document.getElementById('present-days').textContent = data.present ?? '--';
+      document.getElementById('late-days').textContent = data.late ?? '--';
+      document.getElementById('absent-days').textContent = data.absent ?? '--';
+
+      loadingEl.style.display = 'none';
+      summaryContent.style.display = 'block';
+    } catch (error) {
+      loadingEl.textContent = 'Failed to load attendance data.';
+      console.error('Error fetching attendance summary:', error);
+    }
+  }
+
+  // Load summary on page load
+  window.addEventListener('DOMContentLoaded', fetchAttendanceSummary);
+</script>
 
 </body>
 </html>
