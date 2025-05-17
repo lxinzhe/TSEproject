@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports - Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background-color: #343a40;
+            color: white;
+        }
+        .nav-link {
+            color: white;
+            margin: 5px 0;
+        }
+        .nav-link:hover {
+            background-color: #495057;
+            color: white;
+        }
+        .main-content {
+            padding: 20px;
+        }
+        .card {
+            margin-bottom: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 sidebar p-3">
+                <h3 class="text-center mb-4">Admin Panel</h3>
+                <nav class="nav flex-column">
+                    <a class="nav-link" href="admin.html"><i class="fas fa-home me-2"></i>Dashboard</a>
+                    <a class="nav-link" href="employees.html"><i class="fas fa-users me-2"></i>Employees</a>
+                    <a class="nav-link" href="attendance.html"><i class="fas fa-calendar-check me-2"></i>Attendance</a>
+                    <a class="nav-link active" href="reports.html"><i class="fas fa-chart-bar me-2"></i>Reports</a>
+                    <a class="nav-link" href="settings.html"><i class="fas fa-cog me-2"></i>Settings</a>
+                    <a class="nav-link" href="login.html"><i class="fas fa-sign-out-alt me-2"></i>Logout</a>
+                </nav>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 main-content">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>Reports & Analytics</h2>
+                    <div>
+                        <button class="btn btn-success me-2">
+                            <i class="fas fa-file-excel me-2"></i>Export Report
+                        </button>
+                        <button class="btn btn-primary">
+                            <i class="fas fa-print me-2"></i>Print Report
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Report Filters -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <form class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label">Report Type</label>
+                                <select class="form-select">
+                                    <option value="attendance">Attendance Summary</option>
+                                    <option value="late">Late Arrivals</option>
+                                    <option value="absent">Absences</option>
+                                    <option value="overtime">Overtime</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Date Range</label>
+                                <input type="date" class="form-control">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Department</label>
+                                <select class="form-select">
+                                    <option value="">All Departments</option>
+                                    <option value="IT">IT</option>
+                                    <option value="HR">HR</option>
+                                    <option value="Finance">Finance</option>
+                                    <option value="Marketing">Marketing</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">&nbsp;</label>
+                                <button type="submit" class="btn btn-primary w-100">Generate Report</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Attendance Overview</h5>
+                                <canvas id="attendanceChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Department-wise Attendance</h5>
+                                <canvas id="departmentChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Report Table -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Detailed Report</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Employee ID</th>
+                                        <th>Name</th>
+                                        <th>Department</th>
+                                        <th>Present Days</th>
+                                        <th>Late Days</th>
+                                        <th>Absent Days</th>
+                                        <th>Total Working Hours</th>
+                                        <th>Overtime Hours</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>EMP001</td>
+                                        <td>John Doe</td>
+                                        <td>IT</td>
+                                        <td>18</td>
+                                        <td>2</td>
+                                        <td>0</td>
+                                        <td>144</td>
+                                        <td>5</td>
+                                    </tr>
+                                    <tr>
+                                        <td>EMP002</td>
+                                        <td>Jane Smith</td>
+                                        <td>HR</td>
+                                        <td>19</td>
+                                        <td>1</td>
+                                        <td>0</td>
+                                        <td>152</td>
+                                        <td>3</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Attendance Overview Chart
+        const attendanceCtx = document.getElementById('attendanceChart').getContext('2d');
+        new Chart(attendanceCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Present', 'Late', 'Absent'],
+                datasets: [{
+                    data: [85, 10, 5],
+                    backgroundColor: ['#28a745', '#ffc107', '#dc3545']
+                }]
+            }
+        });
+
+        // Department-wise Attendance Chart
+        const departmentCtx = document.getElementById('departmentChart').getContext('2d');
+        new Chart(departmentCtx, {
+            type: 'bar',
+            data: {
+                labels: ['IT', 'HR', 'Finance', 'Marketing'],
+                datasets: [{
+                    label: 'Average Attendance Rate',
+                    data: [95, 92, 88, 90],
+                    backgroundColor: '#007bff'
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html> 
