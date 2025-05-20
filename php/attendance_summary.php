@@ -1,4 +1,4 @@
-<?php
+<?php 
 header('Content-Type: application/json');
 include 'db_connect.php';  // adjust path as needed
 
@@ -7,11 +7,10 @@ $year = (int)$today->format('Y');
 $month = (int)$today->format('m');
 $day = (int)$today->format('d');
 
-// Calculate total days so far in current month (e.g., today = 17 means totalDays = 17)
 $totalDays = $day;
 
-// Prepare SQL to get attendance for current month and year, up to today
-$sql = "SELECT ClockInTime, ClockOutTime, Date 
+// Query attendance records up to today
+$sql = "SELECT ClockInTime, Date 
         FROM attendancerecord 
         WHERE YEAR(Date) = ? 
           AND MONTH(Date) = ? 
@@ -22,27 +21,32 @@ $stmt->bind_param("iii", $year, $month, $day);
 $stmt->execute();
 $result = $stmt->get_result();
 
+// To track which days have records
+$recordedDays = [];
+
 $presentCount = 0;
 $lateCount = 0;
 
-// Threshold for late clock-in: 09:00:00
 $lateThreshold = new DateTime('09:00:00');
 
 while ($row = $result->fetch_assoc()) {
+    $dateStr = $row['Date'];
     $clockIn = $row['ClockInTime'];
-    $clockOut = $row['ClockOutTime'];
 
-    if ($clockIn !== null && $clockOut !== null) {
-        $presentCount++;
+    if ($clockIn !== null) {
         $clockInTime = DateTime::createFromFormat('H:i:s', $clockIn);
-        if ($clockInTime > $lateThreshold) {
+
+        if ($clockInTime <= $lateThreshold) {
+            $presentCount++;
+        } else {
             $lateCount++;
         }
+        $recordedDays[$dateStr] = true;
     }
 }
 
-// Calculate absent days (current month so far - present - late)
-$absentCount = $totalDays - $presentCount - $lateCount;
+// Calculate absent days = totalDays - recorded days
+$absentCount = $totalDays - count($recordedDays);
 if ($absentCount < 0) $absentCount = 0;
 
 $response = [
@@ -52,7 +56,6 @@ $response = [
     'absent' => $absentCount
 ];
 
-// Close connections
 $stmt->close();
 $conn->close();
 
