@@ -125,31 +125,19 @@
       letter-spacing: 1px;
     }
 
-    .summary-row {
-      display: flex;
-      justify-content: space-between;
-      font-size: 1.15rem;
-      margin-bottom: 1rem;
-      font-weight: 600;
-      color: #444;
-      border-bottom: 1px solid #eee;
-      padding-bottom: 0.4rem;
-    }
-
-    .summary-row span:first-child {
-      color: #6a0dad;
-    }
-
-    .summary-row span.value {
-      color: #222;
-      font-weight: 700;
-    }
-
     /* Loader styling */
     #loading {
       font-size: 1.2rem;
       color: #6a0dad;
       margin-top: 1rem;
+      display: none;
+    }
+
+    /* Canvas container */
+    #chart-container {
+      width: 100%;
+      max-width: 600px;
+      margin: auto;
       display: none;
     }
   </style>
@@ -179,60 +167,109 @@
     </div>
 
     <div class="card" aria-live="polite" aria-busy="false" role="region">
-      <h2>Attendance Summary</h2>
+          <!-- Inside the card -->
+    <h2>Attendance Summary</h2>
+    <p id="total-days-text" style="color:#6a0dad; font-weight:600; margin-bottom:1.5rem;"></p>
 
-      <div id="loading">Loading attendance data...</div>
+    <div id="loading">Loading attendance data...</div>
 
-      <div id="summary-content" style="display:none;">
-        <div class="summary-row">
-          <span>Total Days (Current Month So Far):</span>
-          <span class="value" id="total-days">--</span>
-        </div>
-        <div class="summary-row">
-          <span>Present Days:</span>
-          <span class="value" id="present-days">--</span>
-        </div>
-        <div class="summary-row">
-          <span>Late Days:</span>
-          <span class="value" id="late-days">--</span>
-        </div>
-        <div class="summary-row">
-          <span>Absent Days:</span>
-          <span class="value" id="absent-days">--</span>
-        </div>
-      </div>
+    <div id="chart-container">
+      <canvas id="attendanceChart" aria-label="Bar chart showing attendance summary" role="img"></canvas>
+    </div>
     </div>
   </main>
 </div>
 
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js" ></script>
+
 <script>
-  async function fetchAttendanceSummary() {
+  let attendanceChart = null;
+
+    async function fetchAttendanceSummary() {
     const loadingEl = document.getElementById('loading');
-    const summaryContent = document.getElementById('summary-content');
+    const chartContainer = document.getElementById('chart-container');
+
     loadingEl.style.display = 'block';
-    summaryContent.style.display = 'none';
+    chartContainer.style.display = 'none';
 
     try {
-      // Adjust your API endpoint as needed
       const response = await fetch('php/attendance_summary.php');
       if (!response.ok) throw new Error('Network response was not ok');
       const data = await response.json();
 
-      // Update the UI
-      document.getElementById('total-days').textContent = data.totalDays ?? '--';
-      document.getElementById('present-days').textContent = data.present ?? '--';
-      document.getElementById('late-days').textContent = data.late ?? '--';
-      document.getElementById('absent-days').textContent = data.absent ?? '--';
-
       loadingEl.style.display = 'none';
-      summaryContent.style.display = 'block';
+      chartContainer.style.display = 'block';
+
+      // Show total days text above the chart
+      document.getElementById('total-days-text').textContent = 
+        `Total Days (Current Month So Far): ${data.totalDays ?? '--'}`;
+
+      const ctx = document.getElementById('attendanceChart').getContext('2d');
+
+      if (attendanceChart) {
+        attendanceChart.destroy();
+      }
+
+      attendanceChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Present - On Time', 'Present - Late', 'Absent'],
+          datasets: [{
+            label: 'Number of Days',
+            data: [data.present ?? 0, data.late ?? 0, data.absent ?? 0],
+            backgroundColor: [
+              'rgba(144, 238, 144, 0.7)',  
+              'rgba(255, 255, 102, 0.7)',  
+              'rgba(255, 102, 102, 0.7)'  
+            ],
+            borderColor: [
+              'rgba(144, 238, 144, 1)',
+              'rgba(255, 255, 102, 1)',
+              'rgba(255, 102, 102, 1)'
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Number of Days'
+              },
+              ticks: {
+                precision: 0
+              },
+              suggestedMax: data.totalDays // optional max for better scale
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'Attendance Status',
+                font: {
+                  weight: 'bold',
+                  size: 18
+                },
+                color: '#6a0dad'  // purple color to match theme (optional)
+              }
+            }
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: { enabled: true }
+          }
+        }
+      });
+
     } catch (error) {
       loadingEl.textContent = 'Failed to load attendance data.';
       console.error('Error fetching attendance summary:', error);
     }
   }
 
-  // Load summary on page load
+
   window.addEventListener('DOMContentLoaded', fetchAttendanceSummary);
 </script>
 
