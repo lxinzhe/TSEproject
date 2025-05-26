@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ClockOut</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background-color: #f8f7fc;
+      color: #333;
+    }
+
+    header {
+      background-color: #6a0dad;
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+
+    .container {
+      display: flex;
+      height: calc(100vh - 70px);
+    }
+
+    .sidebar {
+      width: 220px;
+      background-color: #ffffff;
+      border-right: 1px solid #ddd;
+      padding: 1rem;
+    }
+
+    .sidebar nav a {
+      display: block;
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      color: #6a0dad;
+      text-decoration: none;
+      border-radius: 5px;
+      transition: background 0.2s;
+    }
+
+    .sidebar nav a:hover {
+      background-color: #f0e6ff;
+    }
+    .logout {
+      margin-top: 215%;
+      text-align: left;
+    }
+    .logout a {
+      color: #6a0dad;
+      text-decoration: none;
+      padding: 0.75rem;
+      border-radius: 5px;
+      transition: background 0.2s;
+    }
+    .logout a:hover {
+      background-color: #f0e6ff;
+    }
+
+    .main {
+      flex-grow: 1;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .card {
+      background-color: #fff;
+      padding: 3rem 3rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(106, 13, 173, 0.2);
+      max-width: 800px;
+      width: 100%;
+      text-align: left; /* Align text left */
+    }
+
+    .card h2 {
+      color: #6a0dad;
+      margin-top: 0;
+      margin-bottom: 1.5rem;
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-align: center; /* Keep heading centered */
+    }
+
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      width: 100%;
+      max-width: 400px;
+      justify-content: center;
+    }
+
+    .button-group button {
+      flex-grow: 1;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      background-color: #6a0dad;
+      color: white;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .button-group button:hover {
+      background-color: #5a0bb2;
+    }
+
+    form {
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    form label {
+      display: block;
+      margin-top: 1rem;
+      font-weight: 600;
+      text-align: left; /* Label aligned left */
+    }
+
+    form input, form select, form button {
+      width: 100%;
+      padding: 0.75rem;
+      margin-top: 0.25rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+
+    form button {
+      background-color: #6a0dad;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      position: relative;
+    }
+
+    form button:hover:not(:disabled) {
+      background-color: #5a0bb2;
+    }
+
+    /* Disabled button style */
+    form button:disabled {
+      background-color: #aaa;
+      cursor: not-allowed;
+      color: #eee;
+      position: relative;
+    }
+
+   /* Tooltip container - hidden by default */
+    .tooltip {
+      position: absolute;
+      background: #333;
+      color: #fff;
+      padding: 5px 8px;
+      font-size: 1rem;
+      border-radius: 6px;
+      white-space: nowrap;
+      visibility: hidden; /* Hidden by default */
+      opacity: 0;
+      margin-top: -0.75rem;
+      margin-bottom: 1rem;
+      pointer-events: none;
+      z-index: 10;
+      width: fit-content;
+      max-width: 400px;
+      bottom: 76%;
+      right: 60%;
+      transform: translateY(-5px);
+      transition: opacity 0.2s, transform 0.2s;
+    }
+
+    /* Tooltip arrow */
+    .tooltip::after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      right: 10px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: #333 transparent transparent transparent;
+    }
+
+    /* Show tooltip when disabled button is hovered */
+    #submitBtn[disabled]:hover + .tooltip {
+      visibility: visible;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>🎮 GameHub Attendance</h1>
+    <div>Welcome, Employee</div>
+  </header>
+
+  <div class="container">
+    <aside class="sidebar">
+      <nav>
+        <a href="UserMainPage.html">Dashboard</a>
+        <a href="ViewRecords.html">View Records</a>
+        <a href="#">Leave Form</a>
+        <a href="#">OverTime Form</a>
+      </nav>
+      <div class="logout"><a href="#">Logout</a></div>
+    </aside>
+
+    <main class="main">
+      <div class="button-group">
+        <button onclick="location.href='ClockIn.html'">Clock In</button>
+        <button onclick="location.href='ClockOut.html'">Clock Out</button>
+      </div>
+
+      <div class="card">
+        <h2>Mark Today's Clock Out Attendance</h2>
+        <form id="attendanceForm" onsubmit="return false;">
+          <label for="employeeName">Name</label>
+          <input type="text" id="employeeName" name="employeeName" placeholder="Enter your name" autocomplete="off" required>
+
+          <label for="clockOutTime">Clock Out Time</label>
+          <input type="text" id="clockOutTime" name="clockOutTime" readonly>
+
+          <input type="hidden" id="date" name="date">
+
+          <button type="button" id="submitBtn">Submit Attendance</button>
+          <div class="tooltip" id="tooltip">Your clock-out for today has already been recorded.</div>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function setClockOutTime() {
+      const now = new Date();
+      const timeString = now.toTimeString().split(' ')[0];
+      const dateString = now.toISOString().split('T')[0];
+      document.getElementById('clockOutTime').value = timeString;
+      document.getElementById('date').value = dateString;
+    }
+
+    function disableSubmitButton() {
+      document.getElementById('submitBtn').disabled = true;
+    }
+
+    function enableSubmitButton() {
+      document.getElementById('submitBtn').disabled = false;
+    }
+
+    function checkClockOutStatus(employeeName, callback) {
+      if (!employeeName) {
+        callback(false);
+        return;
+      }
+      const today = new Date().toISOString().split('T')[0];
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', `php/clockout.php?employeeName=${encodeURIComponent(employeeName)}&date=${today}`, true);
+      xhr.onload = function() {
+        if (xhr.status === 200) {
+          try {
+            const res = JSON.parse(xhr.responseText);
+            callback(res.clockedOut === true);
+          } catch {
+            callback(false);
+          }
+        } else {
+          callback(false);
+        }
+      };
+      xhr.onerror = function() {
+        callback(false);
+      };
+      xhr.send();
+    }
+
+    window.onload = function() {
+      setClockOutTime();
+
+      const employeeInput = document.getElementById('employeeName');
+      const submitBtn = document.getElementById('submitBtn');
+
+      function updateButtonState() {
+        const nameVal = employeeInput.value.trim();
+        if (!nameVal) {
+          enableSubmitButton();
+          return;
+        }
+        checkClockOutStatus(nameVal, function(clockedOut) {
+          if (clockedOut) {
+            disableSubmitButton();
+          } else {
+            enableSubmitButton();
+          }
+        });
+      }
+
+      // Optional: load last clocked out name
+      const lastClockedOutName = localStorage.getItem('lastClockedOutName');
+      if (lastClockedOutName) {
+        employeeInput.value = lastClockedOutName;
+      }
+
+      updateButtonState();
+
+      employeeInput.addEventListener('input', () => {
+        enableSubmitButton();
+        updateButtonState();
+      });
+
+      submitBtn.addEventListener('click', function() {
+        const employeeName = employeeInput.value.trim();
+        const clockOutTime = document.getElementById('clockOutTime').value;
+        const date = document.getElementById('date').value;
+
+        if (!employeeName) {
+          alert('Please enter your name!');
+          return;
+        }
+
+        checkClockOutStatus(employeeName, function(clockedOut) {
+          if (clockedOut) {
+            disableSubmitButton();
+            return;
+          }
+
+          const xhr = new XMLHttpRequest();
+          xhr.open('POST', 'php/clockout.php', true);
+          xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+          xhr.onload = function() {
+            if (xhr.status === 200) {
+              alert('Clock-out time recorded successfully!');
+              disableSubmitButton();
+              localStorage.setItem('lastClockedOutName', employeeName);
+            } else {
+              alert('Error submitting attendance.');
+            }
+          };
+
+          const params = `employeeName=${encodeURIComponent(employeeName)}&clockOutTime=${encodeURIComponent(clockOutTime)}&date=${encodeURIComponent(date)}`;
+          xhr.send(params);
+        });
+      });
+    };
+  </script>
+
+</body>
+</html>

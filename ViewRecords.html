@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>View Records</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background-color: #f8f7fc;
+      color: #333;
+    }
+
+    header {
+      background-color: #6a0dad;
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+
+    .container {
+      display: flex;
+      height: calc(100vh - 70px);
+    }
+
+    .sidebar {
+      width: 220px;
+      background-color: #ffffff;
+      border-right: 1px solid #ddd;
+      padding: 1rem;
+    }
+
+    .sidebar nav a {
+      display: block;
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      color: #6a0dad;
+      text-decoration: none;
+      border-radius: 5px;
+      transition: background 0.2s;
+    }
+
+    .sidebar nav a:hover {
+      background-color: #f0e6ff;
+    }
+
+    .logout {
+      margin-top: 215%;
+      text-align: left;
+    }
+
+    .logout a {
+      color: #6a0dad;
+      text-decoration: none;
+      padding: 0.75rem;
+      border-radius: 5px;
+      transition: background 0.2s;
+    }
+
+    .logout a:hover {
+      background-color: #f0e6ff;
+    }
+
+    .main {
+      flex-grow: 1;
+      padding: 2rem;
+    }
+
+    .card {
+      background-color: #fff;
+      padding: 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      margin-bottom: 2rem;
+    }
+
+    .card h2 {
+      color: #6a0dad;
+      margin-top: 0;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .button-group button {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      background-color: #6a0dad;
+      color: white;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .button-group button:hover {
+      background-color: #5a0bb2;
+    }
+
+    /* Table Styles */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 2rem;
+      display: none; /* Hidden by default */
+    }
+
+    table th, table td {
+      padding: 12px 15px;
+      text-align: center;
+      border: 1px solid #ddd;
+    }
+
+    table th {
+      background-color: #6a0dad;
+      color: white;
+    }
+
+    table td {
+      background-color: #f9f9f9;
+    }
+
+    table tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+
+    /* Hover effect */
+    table tr:hover {
+      background-color: #ddd;
+    }
+
+    .status-present {
+      color: green;
+    }
+    .status-late {
+      color: orange;
+    } 
+    .status-absent {
+      color: red;
+    }
+
+    .total-days {
+      margin-bottom: 1rem;
+      font-size: 1.25rem;
+      font-weight: bold;
+      text-align: left;
+    }
+
+    /* Pie chart container */
+    #pie-chart-container {
+      margin-top: 2rem;
+      width: 100%;
+      height: 400px;
+    }
+
+    /* Dropdown for selecting month */
+    #month-select {
+      padding: 0.75rem;
+      border-radius: 5px;
+      font-size: 1rem;
+      margin-top: 1rem;
+    }
+
+  .pagination-controls {
+      margin-top: 30px;
+      text-align: center;
+      font-weight: bold;
+    }
+    .pagination-controls button {
+      margin: 0 5px;
+      padding: 5px 90px;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      background-color: #6a0dad;
+      color: white;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+    .pagination-controls button:hover:not(:disabled) {
+      background-color: #5a0bb2;
+    }
+    .pagination-controls button:disabled {
+      background-color: #aaa;
+      cursor: not-allowed;
+      color: #eee;
+    }
+    .pagination-info {
+      display: inline-block;
+      padding: 0px 300px;
+      font-weight: normal;
+      color: #333;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<header>
+  <h1>🎮 GameHub Attendance</h1>
+  <div>Welcome, Employee</div>
+</header>
+
+<div class="container">
+  <aside class="sidebar">
+    <nav>
+      <a href="UserMainPage.html">Dashboard</a>
+      <a href="ViewRecords.html">View Records</a>
+      <a href="php/employee_leave_form.php">Leave Form</a>
+      <a href="php/employee_OT_form.php">OverTime Form</a>
+    </nav>
+    <div class="logout"><a href="#">Logout</a></div>
+  </aside>
+
+  <main class="main">
+    <div class="card">
+      <h2>Attendance Record</h2>
+
+      <div class="total-days">
+        <span id="total-days">Total Days (In Current Month): </span>
+      </div>
+
+      <div class="button-group">
+        <button class="status-present" onclick="showTable('present')">Present</button>
+        <button class="status-absent" onclick="showTable('absent')">Absent</button>
+        <button class="status-present" onclick="showTable('status')">Annual Attendance Status</button>
+      </div>
+
+      <div id="status-section" style="display: none;">
+        <select id="month-select" onchange="monthChanged()">
+          <option value="1">January</option>
+          <option value="2">February</option>
+          <option value="3">March</option>
+          <option value="4">April</option>
+          <option value="5">May</option>
+          <option value="6">June</option>
+          <option value="7">July</option>
+          <option value="8">August</option>
+          <option value="9">September</option>
+          <option value="10">October</option>
+          <option value="11">November</option>
+          <option value="12">December</option>
+        </select>
+
+        <div id="pie-chart-container">
+          <canvas id="attendance-pie-chart"></canvas>
+        </div>
+      </div>
+
+      <table id="present-table">
+        <thead>
+          <tr>
+            <th>Employee ID</th>
+            <th>Date</th>
+            <th>Clock In Time</th>
+            <th>Clock Out Time</th>
+            <th>Total Work Hours</th>
+          </tr>
+        </thead>
+        <tbody id="present-body"></tbody>
+      </table>
+      <div id="present-pagination" class="pagination-controls"></div>
+
+      <table id="absent-table">
+        <thead>
+          <tr>
+            <th>Employee ID</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody id="absent-body"></tbody>
+      </table>
+      <div id="absent-pagination" class="pagination-controls"></div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+const rowsPerPage = 5;
+let currentPagePresent = 1;
+let currentPageAbsent = 1;
+
+const monthNames = ["January", "February", "March", "April", "May", "June",
+                    "July", "August", "September", "October", "November", "December"];
+
+function updateTotalDays() {
+  const today = new Date();
+  const currentMonth = today.getMonth() + 1;
+  const year = today.getFullYear();
+
+  const selectedMonth = parseInt(document.getElementById('month-select').value);
+  const totalDaysInMonth = new Date(year, selectedMonth, 0).getDate();
+
+  if (selectedMonth === currentMonth) {
+    document.getElementById('total-days').textContent = 
+      `Total Days (In Current Month So Far): ${today.getDate()}`;
+  } else {
+    document.getElementById('total-days').textContent = 
+      `Total Days (In Selected Month - ${monthNames[selectedMonth - 1]}): ${totalDaysInMonth}`;
+  }
+}
+
+function showTable(tableName) {
+  document.getElementById('present-table').style.display = 'none';
+  document.getElementById('absent-table').style.display = 'none';
+  document.getElementById('status-section').style.display = 'none';
+
+  if (tableName === 'present') {
+    document.getElementById('present-table').style.display = 'table';
+    document.getElementById('present-pagination').style.display = 'block';
+    document.getElementById('absent-pagination').style.display = 'none';
+    currentPagePresent = 1;
+    fetchAttendanceData('present');
+  } else if (tableName === 'absent') {
+    document.getElementById('absent-table').style.display = 'table';
+    document.getElementById('absent-pagination').style.display = 'block';
+    document.getElementById('present-pagination').style.display = 'none';
+    currentPageAbsent = 1;
+    fetchAttendanceData('absent');
+  } else if (tableName === 'status') {
+    document.getElementById('status-section').style.display = 'block';
+    document.getElementById('present-pagination').style.display = 'none';
+    document.getElementById('absent-pagination').style.display = 'none';
+    fetchMonthlyData();
+  }
+}
+
+// Call this when month is changed
+function monthChanged(){
+  updateTotalDays();
+  // Show present table by default when month changes
+  showTable('present');
+}
+
+function fetchAttendanceData(status) {
+  const month = document.getElementById('month-select').value;
+
+  fetch(`php/attendance_detail.php?month=${month}&status=${status}`)
+    .then(res => res.json())
+    .then(data => {
+      if (status === 'present') {
+        paginateAndRender(data.present, 'present');
+      } else {
+        calculateAbsentDatesAndRender(data.present, data.absent);
+      }
+    })
+    .catch(err => console.error('Error fetching attendance data:', err));
+}
+
+function calculateAbsentDatesAndRender(presentRecords, absentRecords) {
+  const month = parseInt(document.getElementById('month-select').value);
+  const today = new Date();
+  const year = today.getFullYear();
+
+  const currentMonth = today.getMonth() + 1;
+  let totalDays;
+  if (month === currentMonth) totalDays = today.getDate();
+  else totalDays = new Date(year, month, 0).getDate();
+
+  // Dates of present & late days from presentRecords
+  const presentDatesSet = new Set(presentRecords.map(r => r.Date));
+
+  // Generate all dates in the month up to totalDays
+  let allDates = [];
+  for (let d = 1; d <= totalDays; d++) {
+    const dayStr = d.toString().padStart(2, '0');
+    const monthStr = month.toString().padStart(2, '0');
+    const dateStr = `${year}-${monthStr}-${dayStr}`;
+    allDates.push(dateStr);
+  }
+
+  // Absent dates = allDates minus presentDates
+  const absentDates = allDates.filter(date => !presentDatesSet.has(date));
+
+  // Map absent dates to display objects with dummy EmployeeID '-'
+  const absentDataForDisplay = absentDates.map(d => ({ EmployeeID: '1', Date: d }));
+
+  // Sort descending for display
+  absentDataForDisplay.sort((a, b) => new Date(b.Date) - new Date(a.Date));
+
+  paginateAndRender(absentDataForDisplay, 'absent');
+}
+
+function paginateAndRender(records, status) {
+  // Ensure sorted descending by Date
+  records.sort((a, b) => new Date(b.Date) - new Date(a.Date));
+
+  const tableBody = document.getElementById(status === 'present' ? 'present-body' : 'absent-body');
+  const paginationDiv = document.getElementById(status === 'present' ? 'present-pagination' : 'absent-pagination');
+
+  let currentPage = status === 'present' ? currentPagePresent : currentPageAbsent;
+  const totalPages = Math.ceil(records.length / rowsPerPage);
+
+  if (currentPage > totalPages) currentPage = totalPages;
+  if (currentPage < 1) currentPage = 1;
+
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const pageRecords = records.slice(startIndex, endIndex);
+
+  tableBody.innerHTML = '';
+
+  pageRecords.forEach(record => {
+    const row = document.createElement('tr');
+    if (status === 'present') {
+      row.innerHTML = `
+        <td>${record.EmployeeID}</td>
+        <td>${record.Date}</td>
+        <td>${record.ClockInTime || 'N/A'}</td>
+        <td>${record.ClockOutTime || 'N/A'}</td>
+        <td>${record.TotalWorkHours || 'N/A'}</td>
+      `;
+    } else {
+      row.innerHTML = `
+        <td>${record.EmployeeID}</td>
+        <td>${record.Date}</td>
+      `;
+    }
+    tableBody.appendChild(row);
+  });
+
+  paginationDiv.innerHTML = '';
+
+  const prevBtn = document.createElement('button');
+  prevBtn.textContent = 'Previous';
+  prevBtn.disabled = currentPage === 1;
+  prevBtn.onclick = () => {
+    if (status === 'present') {
+      currentPagePresent--;
+      paginateAndRender(records, 'present');
+    } else {
+      currentPageAbsent--;
+      paginateAndRender(records, 'absent');
+    }
+  };
+  paginationDiv.appendChild(prevBtn);
+
+  const pageInfo = document.createElement('span');
+  pageInfo.className = 'pagination-info';
+  pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+  paginationDiv.appendChild(pageInfo);
+
+  const nextBtn = document.createElement('button');
+  nextBtn.textContent = 'Next';
+  nextBtn.disabled = currentPage === totalPages;
+  nextBtn.onclick = () => {
+    if (status === 'present') {
+      currentPagePresent++;
+      paginateAndRender(records, 'present');
+    } else {
+      currentPageAbsent++;
+      paginateAndRender(records, 'absent');
+    }
+  };
+  paginationDiv.appendChild(nextBtn);
+
+  if (status === 'present') currentPagePresent = currentPage;
+  else currentPageAbsent = currentPage;
+}
+
+function fetchMonthlyData() {
+  const month = parseInt(document.getElementById('month-select').value);
+  const today = new Date();
+  const year = today.getFullYear();
+
+  fetch(`php/attendance_detail.php?month=${month}`)
+    .then(res => res.json())
+    .then(data => {
+      let presentCount = 0;
+      let lateCount = 0;
+      let absentCount = 0;
+
+      const currentMonth = today.getMonth() + 1;
+      let totalDays;
+      if (month === currentMonth) {
+        totalDays = today.getDate();
+      } else {
+        totalDays = new Date(year, month, 0).getDate();
+      }
+
+      if ((!data.present || data.present.length === 0) && (!data.absent || data.absent.length === 0)) {
+        absentCount = totalDays;
+        renderPieChart(0, 0, absentCount);
+        return;
+      }
+
+      data.present.forEach(record => {
+        const clockInTime = new Date(`1970-01-01T${record.ClockInTime}Z`);
+        const lateThreshold = new Date('1970-01-01T09:00:00Z');
+        if (clockInTime > lateThreshold) lateCount++;
+        else presentCount++;
+      });
+
+      absentCount = totalDays - presentCount - lateCount;
+
+      if (month === currentMonth) {
+        document.getElementById('total-days').textContent =
+          `Total Days (In Current Month So Far): ${totalDays}`;
+      } else {
+        document.getElementById('total-days').textContent =
+          `Total Days (In Selected Month - ${monthNames[month - 1]}): ${totalDays}`;
+      }
+
+      renderPieChart(presentCount, lateCount, absentCount);
+    })
+    .catch(err => console.error('Error fetching monthly data:', err));
+}
+
+let chartInstance = null;
+function renderPieChart(present, late, absent) {
+  const ctx = document.getElementById('attendance-pie-chart').getContext('2d');
+
+  if (chartInstance) chartInstance.destroy();
+
+  chartInstance = new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: ['Present', 'Late', 'Absent'],
+      datasets: [{
+        data: [present, late, absent],
+        backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
+        hoverOffset: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'top' },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => `${ctx.label}: ${ctx.raw}`
+          }
+        }
+      }
+    }
+  });
+}
+
+// Set default month to current month and load data on page load
+window.onload = () => {
+  const today = new Date();
+  const currentMonth = today.getMonth() + 1;
+  document.getElementById('month-select').value = currentMonth;
+  updateTotalDays();
+  showTable('present');
+};
+
+</script>
+
+</body>
+</html>
