@@ -237,12 +237,12 @@ if ($_SERVER["REQUEST_METHOD"] === "GET" && isset($_GET['status']) && $_GET['sta
 <div class="container">
   <aside class="sidebar">
     <nav>
-      <a href="UserMainPage.html">Dashboard</a>
-      <a href="ViewRecords.html">View Records</a>
-      <a href="php/employee_leave_form.php">Leave Form</a>
-      <a href="php/employee_OT_form.php">OverTime Form</a>
+      <a href="/TSE PROJECT/UserMainPage.html">Dashboard</a>
+      <a href="/TSE PROJECT/ViewRecords.html">View Records</a>
+      <a href="employee_leave_form.php">Leave Form</a>
+      <a href="employee_OT_form.php">OverTime Form</a>
     </nav>
-    <div class="logout"><a href="#">Logout</a></div>
+      <div class="logout"><a href="Userlogin.php">Logout</a></div>
   </aside>
 
   <main class="main">
