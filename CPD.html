@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CPD Programme</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background-color: #f8f7fc;
+      color: #333;
+    }
+
+    header {
+      background-color: #6a0dad;
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+
+    .container {
+      display: flex;
+      height: calc(100vh - 70px);
+    }
+
+    .sidebar {
+      width: 220px;
+      background-color: #ffffff;
+      border-right: 1px solid #ddd;
+      padding: 1rem;
+    position: fixed; /* Keep sidebar fixed on the left */
+
+    }
+
+    .sidebar nav a {
+      display: block;
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      color: #6a0dad;
+      text-decoration: none;
+      border-radius: 5px;
+      transition: background 0.2s;
+    }
+
+    .sidebar nav a:hover {
+      background-color: #f0e6ff;
+    }
+
+    .logout {
+      margin-top: 186%;
+      text-align: left;
+    }
+
+    .logout a {
+      color: #6a0dad;
+      text-decoration: none;
+      padding: 0.75rem;
+      border-radius: 5px;
+      transition: background 0.2s;
+    }
+
+    .logout a:hover {
+      background-color: #f0e6ff;
+    }
+
+    .main {
+      flex-grow: 1;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .card {
+      background-color: #fff;
+      padding: 10px 0px 0px 0px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(106, 13, 173, 0.2);
+      max-width: 1000px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .card h2 {
+      color: #6a0dad;
+      margin-top: 0;
+      margin-bottom: 1.5rem;
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .card p {
+      color: #333;
+      font-size: 1.1rem;
+    }
+
+    /* Dropdown - month selector */
+    .month-selector {
+      margin-top: 2rem;
+      margin-right: 52%;
+      max-width: 300px;
+      text-align: left;
+      padding-left: 1rem;
+      position: relative;
+    }
+
+    .month-selector select {
+      padding: 0.5rem;
+      font-size: 1rem;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      background-color: white;
+      width: 100%;
+    }
+
+    /* CPD Program Frames */
+    .cpd-program {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Adjusts the grid for 1 or 2 items per row */
+        gap: 1rem;
+        margin-top: 2rem;
+        width: 100%;
+        margin-left: 34%;
+    }
+
+    .cpd-program .program-frame {
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(106, 13, 173, 0.2);
+      padding: 1rem;
+      width: 300px; /* Fixed width for the program frames */
+      height: 370px; /* Fixed height for the program frames */
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .cpd-program .program-frame:hover {
+      transform: translateY(-5px);
+    }
+
+    .cpd-program .program-frame img {
+      width: 100%;
+      height: auto;
+      border-radius: 6px;
+    }
+
+    .cpd-program .program-frame h3 {
+      color: #6a0dad;
+      font-size: 1.2rem;
+      margin-top: 1rem;
+    }
+
+    .cpd-program .program-frame .dates {
+      margin-top: 1rem;
+      color: #000000;
+      font-size: 1rem;
+      font-weight: bold;
+    }
+
+    /* No CPD message */
+    .no-cpd {
+      color: #6a0dad;
+      font-size: 1.2rem;
+      margin-top: 2rem;
+      text-align: center;
+    }
+
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🎮 GameHub CPD Programme</h1>
+  <div>Welcome, Employee</div>
+</header>
+
+<div class="container">
+  <aside class="sidebar">
+    <nav>
+      <a href="UserMainPage.html">Dashboard</a>
+      <a href="ViewRecords.html">View Records</a>
+      <a href="php/employee_leave_form.php">Leave Form</a>
+      <a href="php/employee_OT_form.php">OverTime Form</a>
+      <a href="CPD.html">CPD Programme</a>
+    </nav>
+    <div class="logout"><a href="php/Userlogin.php">Logout</a></div>
+  </aside>
+
+  <main class="main">
+    <div class="card">
+      <h2>CPD Programme 2025</h2>
+    </div>
+
+    <div class="month-selector">
+      <label for="monthSelector" style="font-weight: bold;">Select Month:</label>
+      <select id="monthSelector" onchange="updatePage()">
+        <option value="1">January</option>
+        <option value="2">February</option>
+        <option value="3">March</option>
+        <option value="4">April</option>
+        <option value="5">May</option>
+        <option value="6">June</option>
+        <option value="7">July</option>
+        <option value="8">August</option>
+        <option value="9">September</option>
+        <option value="10">October</option>
+        <option value="11">November</option>
+        <option value="12">December</option>
+      </select>
+    </div>
+
+    <div id="cpd-programs" class="cpd-program">
+      <!-- CPD Programs will be shown here dynamically -->
+    </div>
+
+    <div id="no-cpd-message" class="no-cpd">
+      <!-- Message for no CPD Programs -->
+    </div>
+
+  </main>
+</div>
+
+<script>
+  const cpdPrograms = {
+    1: [], // No CPD programs for January
+    2: [], // No CPD programs for February
+    3: [], // No CPD programs for March
+    4: [], // No CPD programs for April
+    5: [
+      {  title: "GameDev Immersion: Advanced Engine Techniques", image: "image/image1.png", link: "#game-dev-immersion", startDate: "2025-05-01", endDate: "2025-05-07" },
+    ], // One CPD program for May
+    6: [
+      { title: "Player Psychology & UX/UI Design for Engagement", image: "image/image3.png", link: "#player-psychology", startDate: "2025-06-10", endDate: "2025-06-15" },
+    ], // One CPD program for June
+    7: [
+      { title: "Narrative & World-Building Masterclass", image: "image/image2.png", link: "#narrative-masterclass", startDate: "2025-07-05", endDate: "2025-07-10" },
+    ], // One CPD program for July
+    8: [
+      { title: "Esports & Live Service Game Operations", image: "image/image4.png", link: "#esports-game-operations", startDate: "2025-08-01", endDate: "2025-08-07" },
+      { title: "Procedural Generation & AI in Gaming", image: "image/image5.png", link: "#procedural-generation", startDate: "2025-08-08", endDate: "2025-08-14" },
+    ], // Two CPD programs for August
+    9: [
+      { title: "Monetization & Business Models in Gaming", image: "image/image6.png", link: "#monetization-business-models", startDate: "2025-09-01", endDate: "2025-09-07" },
+    ], // One CPD program for September
+    10: [
+      { title: "Cross-Platform Development & Optimization", image: "image/image7.png", link: "#cross-platform-development", startDate: "2025-10-01", endDate: "2025-10-07" },
+      { title: "Agile Game Development & Project Management", image: "image/image8.png", link: "#agile-game-development", startDate: "2025-10-08", endDate: "2025-10-15" },
+    ], // Two CPD programs for October
+    11: [
+      { title: "Audio Design & Interactive Soundscapes", image: "image/image9.png", link: "#audio-design", startDate: "2025-11-01", endDate: "2025-11-07" },
+    ], // One CPD program for November
+    12: [
+      { title: "Emerging Technologies in Gaming: VR/AR/Cloud Gaming Exploration", image: "image/image10.png", link: "#emerging-technologies", startDate: "2025-12-01", endDate: "2025-12-07" },
+    ], // One CPD program for December
+  };
+
+  // Function to load the CPD programs for the selected month
+  function loadCPDPrograms(month) {
+    const cpdContainer = document.getElementById('cpd-programs');
+    const noCPDMessage = document.getElementById('no-cpd-message');
+    cpdContainer.innerHTML = ''; // Clear any existing programs
+    noCPDMessage.innerHTML = ''; // Clear previous no-program message
+
+    const programs = cpdPrograms[month];
+
+    if (programs && programs.length > 0) {
+      programs.forEach(program => {
+        const programDiv = document.createElement('div');
+        programDiv.classList.add('program-frame');
+        programDiv.onclick = () => { window.location.href = program.link; };
+
+        const programImage = document.createElement('img');
+        programImage.src = program.image;
+        programDiv.appendChild(programImage);
+
+        const programTitle = document.createElement('h3');
+        programTitle.textContent = program.title;
+        programDiv.appendChild(programTitle);
+
+        const programDates = document.createElement('div');
+        programDates.classList.add('dates');
+        programDates.textContent = `Start Date: ${program.startDate} | End Date: ${program.endDate}`;
+        programDiv.appendChild(programDates);
+
+        cpdContainer.appendChild(programDiv);
+      });
+    } else {
+      noCPDMessage.textContent = 'There is no CPD programme for this month.';
+    }
+  }
+
+  // Function to ensure the page loads for the current month
+  function setCurrentMonth() {
+    const currentMonth = new Date().getMonth() + 1; // get current month (1-12)
+    document.getElementById('monthSelector').value = currentMonth; // set dropdown to current month
+    loadCPDPrograms(currentMonth); // Load CPD programs for the current month
+  }
+
+  // Function to update the page when a new month is selected
+  function updatePage() {
+    const selectedMonth = document.getElementById('monthSelector').value;
+    loadCPDPrograms(selectedMonth); // Load CPD programs for the selected month
+  }
+
+  // Set the default to current month on page load
+  window.addEventListener('DOMContentLoaded', setCurrentMonth);
+</script>
+
+</body>
+</html>

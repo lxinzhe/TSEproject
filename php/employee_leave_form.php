@@ -103,7 +103,7 @@ if ($_SERVER["REQUEST_METHOD"] === "GET" && isset($_GET['status']) && $_GET['sta
     }
 
     .logout {
-      margin-top: 215%;
+      margin-top: 186%;
       text-align: left;
     }
 
@@ -229,8 +229,9 @@ if ($_SERVER["REQUEST_METHOD"] === "GET" && isset($_GET['status']) && $_GET['sta
       <a href="/TSE PROJECT/ViewRecords.html">View Records</a>
       <a href="employee_leave_form.php">Leave Form</a>
       <a href="employee_OT_form.php">OverTime Form</a>
+      <a href="/TSE PROJECT/CPD.html">CPD Programme</a>
     </nav>
-      <div class="logout"><a href="Userlogin.php">Logout</a></div>
+      <div class="logout"><a href="php/Userlogin.php">Logout</a></div>
   </aside>
 
   <main class="main">
