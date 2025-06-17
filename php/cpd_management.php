@@ -4,8 +4,6 @@ include('db_connect.php');
 // Handle Delete CPD Program
 if (isset($_GET['delete'])) {
     $id = $_GET['delete'];
-
-    // Delete the CPD program from the database
     $sql = "DELETE FROM cpd_program WHERE id = $id";
     if ($conn->query($sql) === TRUE) {
         header('Location: cpd_management.php');
@@ -23,9 +21,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_cpd'])) {
     $programme_name = mysqli_real_escape_string($conn, $_POST['programme_name']);
     $start_date = mysqli_real_escape_string($conn, $_POST['start_date']);
     $end_date = mysqli_real_escape_string($conn, $_POST['end_date']);
+    $category_id = mysqli_real_escape_string($conn, $_POST['category_id']);
 
-    // Insert new CPD program into the database
-    $sql = "INSERT INTO cpd_program (programme_name, Day_Start, Day_End) VALUES ('$programme_name', '$start_date', '$end_date')";
+    $sql = "INSERT INTO cpd_program (programme_name, Day_Start, Day_End, category_id) VALUES ('$programme_name', '$start_date', '$end_date', '$category_id')";
     
     if ($conn->query($sql) === TRUE) {
         $success = "CPD Program added successfully!";
@@ -36,15 +34,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_cpd'])) {
 
 // Handle Edit CPD Program
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['edit_cpd'])) {
-    // Check if 'program_id' is set
     if (isset($_POST['program_id'])) {
         $id = $_POST['program_id'];
         $programme_name = mysqli_real_escape_string($conn, $_POST['programme_name']);
         $start_date = mysqli_real_escape_string($conn, $_POST['start_date']);
         $end_date = mysqli_real_escape_string($conn, $_POST['end_date']);
+        $category_id = mysqli_real_escape_string($conn, $_POST['category_id']);
 
-        // Update CPD program in the database
-        $sql = "UPDATE cpd_program SET programme_name='$programme_name', Day_Start='$start_date', Day_End='$end_date' WHERE id = $id";
+        $sql = "UPDATE cpd_program SET programme_name='$programme_name', Day_Start='$start_date', Day_End='$end_date', category_id='$category_id' WHERE id = $id";
         
         if ($conn->query($sql) === TRUE) {
             $success = "CPD Program updated successfully!";
@@ -52,16 +49,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['edit_cpd'])) {
             $error = "Error: " . $conn->error;
         }
     } else {
-        // If 'program_id' is not set
         $error = "No program selected for editing.";
     }
 }
 
-
-
-// Fetch CPD programs from the database
-$sql = "SELECT * FROM cpd_program ORDER BY Day_Start DESC";
+// Fetch CPD programs with categories
+$sql = "SELECT p.*, c.category_name, c.target_hours 
+        FROM cpd_program p 
+        LEFT JOIN cpd_categories c ON p.category_id = c.category_id 
+        ORDER BY p.Day_Start DESC";
 $result = $conn->query($sql);
+
+// Fetch categories for dropdown
+$categories_sql = "SELECT * FROM cpd_categories ORDER BY category_name";
+$categories_result = $conn->query($categories_sql);
 ?>
 
 <!DOCTYPE html>
@@ -87,6 +88,10 @@ $result = $conn->query($sql);
             background-color: #495057;
             color: white;
         }
+        .category-badge {
+            font-size: 0.8em;
+            padding: 0.25rem 0.5rem;
+        }
     </style>
 </head>
 <body>
@@ -97,11 +102,12 @@ $result = $conn->query($sql);
                 <h3 class="text-center mb-4">Admin Panel</h3>
                 <nav class="nav flex-column">
                     <a class="nav-link" href="admin.php"><i class="fas fa-home me-2"></i>Dashboard</a>
-                    <a class="nav-link active" href="employees.php"><i class="fas fa-users me-2"></i>Employees</a>
+                    <a class="nav-link" href="employees.php"><i class="fas fa-users me-2"></i>Employees</a>
                     <a class="nav-link" href="attendance.php"><i class="fas fa-calendar-check me-2"></i>Attendance</a>
                     <a class="nav-link" href="reports.php"><i class="fas fa-chart-bar me-2"></i>Reports</a>
-                    <a class="nav-link" href="cpd_management.php"><i class="fas fa-graduation-cap me-2"></i>CPD Programs</a>
-                    <a class="nav-link" href="cpd_records.php"><i class="fas fa-clipboard-list me-2"></i>CPD Records</a>
+                    <a class="nav-link active" href="cpd_management.php"><i class="fas fa-graduation-cap me-2"></i>Event Programs</a>
+                    <a class="nav-link" href="cpd_records.php"><i class="fas fa-clipboard-list me-2"></i>Event Records</a>
+                    <a class="nav-link" href="cpd_categories.php"><i class="fas fa-tags me-2"></i>Event Categories</a>
                     <a class="nav-link" href="login.php"><i class="fas fa-sign-out-alt me-2"></i>Logout</a>
                 </nav>
             </div>
@@ -117,33 +123,56 @@ $result = $conn->query($sql);
 
                     <!-- Add New CPD Program Form -->
                     <div class="mb-3 mt-3">
-                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCPDModal">Add New CPD Program</button>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCPDModal">
+                            <i class="fas fa-plus me-2"></i>Add New CPD Program
+                        </button>
+                        <a href="cpd_categories.php" class="btn btn-secondary ms-2">
+                            <i class="fas fa-tags me-2"></i>Manage Categories
+                        </a>
                     </div>
 
                     <!-- CPD Programs Table -->
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Program Name</th>
-                                <th>Start Date</th>
-                                <th>End Date</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php while ($row = $result->fetch_assoc()): ?>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped">
+                            <thead class="table-dark">
                                 <tr>
-                                    <td><?= $row['programme_name']; ?></td>
-                                    <td><?= $row['Day_Start']; ?></td>
-                                    <td><?= $row['Day_End']; ?></td>
-                                    <td>
-                                        <a href="cpd_management.php?edit=<?= $row['id']; ?>" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editCPDModal" onclick="populateEditModal(<?= $row['id']; ?>, '<?= $row['programme_name']; ?>', '<?= $row['Day_Start']; ?>', '<?= $row['Day_End']; ?>')">Edit</a>
-                                        <a href="cpd_management.php?delete=<?= $row['id']; ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this CPD program?');">Delete</a>
-                                    </td>
+                                    <th>Program Name</th>
+                                    <th>Category</th>
+                                    <th>Target Hours</th>
+                                    <th>Start Date</th>
+                                    <th>End Date</th>
+                                    <th>Actions</th>
                                 </tr>
-                            <?php endwhile; ?>
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                <?php while ($row = $result->fetch_assoc()): ?>
+                                    <tr>
+                                        <td><?= htmlspecialchars($row['programme_name']); ?></td>
+                                        <td>
+                                            <?php if ($row['category_name']): ?>
+                                                <span class="badge bg-primary category-badge"><?= htmlspecialchars($row['category_name']); ?></span>
+                                            <?php else: ?>
+                                                <span class="badge bg-secondary category-badge">Uncategorized</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td><?= $row['target_hours'] ? $row['target_hours'] . ' hours' : 'N/A'; ?></td>
+                                        <td><?= $row['Day_Start']; ?></td>
+                                        <td><?= $row['Day_End']; ?></td>
+                                        <td>
+                                            <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editCPDModal" 
+                                                onclick="populateEditModal(<?= $row['id']; ?>, '<?= htmlspecialchars($row['programme_name'], ENT_QUOTES); ?>', '<?= $row['Day_Start']; ?>', '<?= $row['Day_End']; ?>', <?= $row['category_id'] ?: 'null'; ?>)">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </button>
+                                            <a href="cpd_management.php?delete=<?= $row['id']; ?>" class="btn btn-danger btn-sm" 
+                                               onclick="return confirm('Are you sure you want to delete this CPD program?');">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </a>
+                                        </td>
+                                    </tr>
+                                <?php endwhile; ?>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -164,6 +193,17 @@ $result = $conn->query($sql);
                             <input type="text" name="programme_name" class="form-control" required>
                         </div>
                         <div class="mb-3">
+                            <label for="category_id" class="form-label">Category</label>
+                            <select name="category_id" class="form-select" required>
+                                <option value="">Select Category</option>
+                                <?php 
+                                $categories_result->data_seek(0);
+                                while ($cat = $categories_result->fetch_assoc()): ?>
+                                    <option value="<?= $cat['category_id']; ?>"><?= htmlspecialchars($cat['category_name']); ?> (<?= $cat['target_hours']; ?>h)</option>
+                                <?php endwhile; ?>
+                            </select>
+                        </div>
+                        <div class="mb-3">
                             <label for="start_date" class="form-label">Start Date</label>
                             <input type="date" name="start_date" class="form-control" required>
                         </div>
@@ -182,52 +222,60 @@ $result = $conn->query($sql);
     </div>
 
     <!-- Modal for Editing CPD Program -->
-<div class="modal fade" id="editCPDModal" tabindex="-1" aria-labelledby="editCPDModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editCPDModalLabel">Edit CPD Program</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal fade" id="editCPDModal" tabindex="-1" aria-labelledby="editCPDModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editCPDModalLabel">Edit CPD Program</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="POST" action="cpd_management.php" id="editCPDForm">
+                    <div class="modal-body">
+                        <input type="hidden" name="program_id" id="edit_program_id" value="">
+                        
+                        <div class="mb-3">
+                            <label for="edit_programme_name" class="form-label">Program Name</label>
+                            <input type="text" name="programme_name" class="form-control" id="edit_programme_name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit_category_id" class="form-label">Category</label>
+                            <select name="category_id" id="edit_category_id" class="form-select" required>
+                                <option value="">Select Category</option>
+                                <?php 
+                                $categories_result->data_seek(0);
+                                while ($cat = $categories_result->fetch_assoc()): ?>
+                                    <option value="<?= $cat['category_id']; ?>"><?= htmlspecialchars($cat['category_name']); ?> (<?= $cat['target_hours']; ?>h)</option>
+                                <?php endwhile; ?>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit_start_date" class="form-label">Start Date</label>
+                            <input type="date" name="start_date" class="form-control" id="edit_start_date" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit_end_date" class="form-label">End Date</label>
+                            <input type="date" name="end_date" class="form-control" id="edit_end_date" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" name="edit_cpd" class="btn btn-primary">Update Program</button>
+                    </div>
+                </form>
             </div>
-            <form method="POST" action="cpd_management.php" id="editCPDForm">
-                <div class="modal-body">
-                    <!-- Add hidden input for program_id -->
-                    <input type="hidden" name="program_id" id="edit_program_id" value="">
-                    
-                    <div class="mb-3">
-                        <label for="edit_programme_name" class="form-label">Program Name</label>
-                        <input type="text" name="programme_name" class="form-control" id="edit_programme_name" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="edit_start_date" class="form-label">Start Date</label>
-                        <input type="date" name="start_date" class="form-control" id="edit_start_date" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="edit_end_date" class="form-label">End Date</label>
-                        <input type="date" name="end_date" class="form-control" id="edit_end_date" required>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" name="edit_cpd" class="btn btn-primary">Update Program</button>
-                </div>
-            </form>
         </div>
     </div>
-</div>
 
-<script>
-function populateEditModal(id, programme_name, start_date, end_date) {
-    // Set the values to the modal form fields
-    document.getElementById('edit_programme_name').value = programme_name;
-    document.getElementById('edit_start_date').value = start_date;
-    document.getElementById('edit_end_date').value = end_date;
-    
-    // Set the program ID in the hidden input field
-    document.getElementById('edit_program_id').value = id;
-    
-    console.log('Edit modal populated with ID:', id); // Debug line
-}
-</script>
+    <script>
+    function populateEditModal(id, programme_name, start_date, end_date, category_id) {
+        document.getElementById('edit_programme_name').value = programme_name;
+        document.getElementById('edit_start_date').value = start_date;
+        document.getElementById('edit_end_date').value = end_date;
+        document.getElementById('edit_program_id').value = id;
+        document.getElementById('edit_category_id').value = category_id || '';
+        
+        console.log('Edit modal populated with ID:', id);
+    }
+    </script>
 </body>
 </html>
