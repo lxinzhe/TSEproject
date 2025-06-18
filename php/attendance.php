@@ -254,9 +254,10 @@ $employee_result = $conn->query($employee_sql);
                     <a class="nav-link" href="employees.php"><i class="fas fa-users me-2"></i>Employees</a>
                     <a class="nav-link active" href="attendance.php"><i class="fas fa-calendar-check me-2"></i>Attendance</a>
                     <a class="nav-link" href="reports.php"><i class="fas fa-chart-bar me-2"></i>Reports</a>
-                    <a class="nav-link" href="cpd_management.php"><i class="fas fa-graduation-cap me-2"></i>CPD Programs</a>
-                    <a class="nav-link" href="cpd_records.php"><i class="fas fa-clipboard-list me-2"></i>CPD Records</a>
-                    <a class="nav-link" href="login.php"><i class="fas fa-sign-out-alt me-2"></i>Logout</a>
+                    <a class="nav-link" href="cpd_management.php"><i class="fas fa-graduation-cap me-2"></i>Event Programs</a>
+                    <a class="nav-link" href="cpd_records.php"><i class="fas fa-clipboard-list me-2"></i>Event Records</a>
+                    <a class="nav-link" href="cpd_categories.php"><i class="fas fa-tags me-2"></i>Event Categories</a>
+                    <a class="nav-link" href="admin_login.php"><i class="fas fa-sign-out-alt me-2"></i>Logout</a>
                 </nav>
             </div>
 
