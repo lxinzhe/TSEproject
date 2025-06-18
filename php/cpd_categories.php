@@ -135,8 +135,10 @@ $result = $conn->query($sql);
                     <a class="nav-link" href="reports.php"><i class="fas fa-chart-bar me-2"></i>Reports</a>
                     <a class="nav-link" href="cpd_management.php"><i class="fas fa-graduation-cap me-2"></i>Event Programs</a>
                     <a class="nav-link" href="cpd_records.php"><i class="fas fa-clipboard-list me-2"></i>Event Records</a>
-                    <a class="nav-link active" href="cpd_categories.php"><i class="fas fa-tags me-2"></i>Event Categories</a>
-                    <a class="nav-link" href="admin_login.php"><i class="fas fa-sign-out-alt me-2"></i>Logout</a>
+                    <a class="nav-link" href="cpd_categories.php"><i class="fas fa-tags me-2"></i>Event Categories</a>
+                    <a class="nav-link" href="leave_requests.php"><i class="fas fa-calendar-times me-2"></i>Accept Leave Form</a>
+                    <a class="nav-link" href="overtime_requests.php"><i class="fas fa-clock me-2"></i>Accept Overtime Form</a>
+                    <a class="nav-link" href="admin_logout.php"><i class="fas fa-sign-out-alt me-2"></i>Logout</a>
                 </nav>
             </div>
 
