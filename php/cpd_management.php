@@ -108,7 +108,7 @@ $categories_result = $conn->query($categories_sql);
                     <a class="nav-link active" href="cpd_management.php"><i class="fas fa-graduation-cap me-2"></i>Event Programs</a>
                     <a class="nav-link" href="cpd_records.php"><i class="fas fa-clipboard-list me-2"></i>Event Records</a>
                     <a class="nav-link" href="cpd_categories.php"><i class="fas fa-tags me-2"></i>Event Categories</a>
-                    <a class="nav-link" href="login.php"><i class="fas fa-sign-out-alt me-2"></i>Logout</a>
+                    <a class="nav-link" href="admin_login.php"><i class="fas fa-sign-out-alt me-2"></i>Logout</a>
                 </nav>
             </div>
 
