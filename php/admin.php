@@ -146,14 +146,16 @@ $result = $conn->query($sql);
             <div class="col-md-3 col-lg-2 sidebar p-3">
                 <h3 class="text-center mb-4">Admin Panel</h3>
                 <nav class="nav flex-column">
-                    <a class="nav-link active" href="admin.php"><i class="fas fa-home me-2"></i>Dashboard</a>
+                    <a class="nav-link" href="admin.php"><i class="fas fa-home me-2"></i>Dashboard</a>
                     <a class="nav-link" href="employees.php"><i class="fas fa-users me-2"></i>Employees</a>
                     <a class="nav-link" href="attendance.php"><i class="fas fa-calendar-check me-2"></i>Attendance</a>
                     <a class="nav-link" href="reports.php"><i class="fas fa-chart-bar me-2"></i>Reports</a>
                     <a class="nav-link" href="cpd_management.php"><i class="fas fa-graduation-cap me-2"></i>Event Programs</a>
                     <a class="nav-link" href="cpd_records.php"><i class="fas fa-clipboard-list me-2"></i>Event Records</a>
                     <a class="nav-link" href="cpd_categories.php"><i class="fas fa-tags me-2"></i>Event Categories</a>
-                    <a class="nav-link" href="admin_login.php"><i class="fas fa-sign-out-alt me-2"></i>Logout</a>
+                    <a class="nav-link" href="leave_requests.php"><i class="fas fa-calendar-times me-2"></i>Accept Leave Form</a>
+                    <a class="nav-link" href="overtime_requests.php"><i class="fas fa-clock me-2"></i>Accept Overtime Form</a>
+                    <a class="nav-link" href="admin_logout.php"><i class="fas fa-sign-out-alt me-2"></i>Logout</a>
                 </nav>
             </div>
 
