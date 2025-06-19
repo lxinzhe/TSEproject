@@ -117,7 +117,7 @@ $categories_result = $conn->query($categories_sql);
             <!-- Main Content -->
             <div class="col-md-9 col-lg-10 main-content">
                 <div class="container mt-4">
-                    <h2>Manage CPD Programs</h2>
+                    <h2>Manage Event Programs</h2>
 
                     <!-- Success/Error Messages -->
                     <?php if ($success) echo "<div class='alert alert-success'>$success</div>"; ?>
@@ -126,7 +126,7 @@ $categories_result = $conn->query($categories_sql);
                     <!-- Add New CPD Program Form -->
                     <div class="mb-3 mt-3">
                         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCPDModal">
-                            <i class="fas fa-plus me-2"></i>Add New CPD Program
+                            <i class="fas fa-plus me-2"></i>Add New Event Program
                         </button>
                         <a href="cpd_categories.php" class="btn btn-secondary ms-2">
                             <i class="fas fa-tags me-2"></i>Manage Categories
