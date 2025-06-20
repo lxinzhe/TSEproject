@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CPD Programme Details</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background-color: #f8f7fc;
+      color: #333;
+    }
+
+    header {
+      background-color: #6a0dad;
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+
+    .container {
+      display: flex;
+      height: calc(100vh - 70px);
+    }
+
+    .sidebar {
+      width: 220px;
+      background-color: #ffffff;
+      border-right: 1px solid #ddd;
+      padding: 1rem;
+      position: fixed;
+    }
+
+    .sidebar nav a {
+      display: block;
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      color: #6a0dad;
+      text-decoration: none;
+      border-radius: 5px;
+      transition: background 0.2s;
+    }
+
+    .sidebar nav a:hover {
+      background-color: #f0e6ff;
+    }
+
+    .logout {
+      margin-top: 156%;
+      text-align: left;
+    }
+
+    .logout a {
+      color: #6a0dad;
+      text-decoration: none;
+      padding: 0.75rem;
+      border-radius: 5px;
+      transition: background 0.2s;
+    }
+
+    .logout a:hover {
+      background-color: #f0e6ff;
+    }
+
+    .main {
+      flex-grow: 1;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-left: 240px;
+    }
+
+    .card {
+      background-color: #fff;
+      padding: 10px 0px 20px 0px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(106, 13, 173, 0.2);
+      max-width: 1000px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .card h2 {
+      color: #6a0dad;
+      margin-top: 0;
+      margin-bottom: 1.5rem;
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .card p {
+      color: #333;
+      font-size: 1.1rem;
+    }
+
+    .cpd-details {
+      display: block;
+      text-align: center;
+      margin-top: 2rem;
+      margin-left: 10%;
+      padding: 20px;
+      background-color: #ebebeb;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(106, 13, 173, 0.2);
+      max-width: 800px;
+      width: 100%;
+    }
+
+    .cpd-details h3 {
+      color: #000000;
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+    }
+
+    .cpd-details .dates {
+      font-size: 1rem;
+      color: #000000;
+      font-weight: bold;
+    }
+
+    .cpd-details img {
+      width: 100%;
+      max-width: 400px;
+      margin-top: 1rem;
+      border-radius: 6px;
+      border: 5px solid #555;
+    }
+
+    .button-group {
+      display: flex;
+      padding: 15px;
+      margin-left: 24%;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      width: 100%;
+      max-width: 400px;
+      justify-content: center;
+    }
+
+    .button-group button {
+      flex-grow: 1;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      background-color: #6a0dad;
+      color: white;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .button-group button:hover {
+      background-color: #5a0bb2;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🎮 GameHub Attendance</h1>
+  <div>Welcome, Employee</div>
+</header>
+
+<div class="container">
+  <aside class="sidebar">
+    <nav>
+      <a href="UserMainPage.html">Dashboard</a>
+      <a href="ViewRecords.html">View Records</a>
+      <a href="php/employee_leave_form.php">Leave Form</a>
+      <a href="php/employee_OT_form.php">OverTime Form</a>
+      <a href="CPD.html">Event Program</a>
+      <a href="EventRecords.html">Event Records</a>
+    </nav>
+    
+    <div class="logout"><a href="php/Userlogin.php">Logout</a></div>
+  </aside>
+
+  <main class="main">
+    <div class="card">
+      <h2>CPD Programme Details</h2>
+
+      <div id="cpd-details" class="cpd-details">
+        <!-- Adding id="cpd-title" for dynamic title insertion -->
+        <h3 id="cpd-title">CPD Program Title</h3>
+        <p id="cpd-description"></p>
+        <div id="cpd-dates" class="dates"></div>
+        <img id="cpd-image" src="" alt="CPD Program Image">
+
+        <!-- Clock In / Clock Out buttons -->
+        <div class="button-group">
+          <button onclick="navigateToClockIn()">Clock In</button>
+          <button onclick="navigateToClockOut()">Clock Out</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  // Function to get query parameters from the URL
+  function getQueryParams() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return {
+      title: urlParams.get('title'),
+      startDate: urlParams.get('startDate'),
+      endDate: urlParams.get('endDate'),
+      image: urlParams.get('image')
+    };
+  }
+
+  // Function to display the CPD program details
+  function displayCPDDetails() {
+    const params = getQueryParams();
+    document.getElementById('cpd-title').textContent = params.title; // Ensure the element exists before use
+    document.getElementById('cpd-dates').textContent = `Start Date: ${params.startDate} | End Date: ${params.endDate}`;
+    document.getElementById('cpd-image').src = params.image; // Display the image
+  }
+
+  function navigateToClockIn() {
+    const params = getQueryParams();
+    const url = `cpd_details_clockin.html?title=${encodeURIComponent(params.title)}&startDate=${encodeURIComponent(params.startDate)}&endDate=${encodeURIComponent(params.endDate)}&image=${encodeURIComponent(params.image)}`;
+    window.location.href = url;
+  }
+
+  function navigateToClockOut() {
+    const params = getQueryParams();
+    const url = `cpd_details_clockout.html?title=${encodeURIComponent(params.title)}&startDate=${encodeURIComponent(params.startDate)}&endDate=${encodeURIComponent(params.endDate)}&image=${encodeURIComponent(params.image)}`;
+    window.location.href = url;
+  }
+
+  // Initialize page with details
+  window.addEventListener('DOMContentLoaded', displayCPDDetails);
+</script>
+
+</body>
+</html>

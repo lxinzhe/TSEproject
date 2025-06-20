@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Event Records</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background-color: #f8f7fc;
+      color: #333;
+    }
+
+    header {
+      background-color: #6a0dad;
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+
+    .container {
+      display: flex;
+      height: calc(100vh - 70px);
+    }
+
+    .sidebar {
+      width: 220px;
+      background-color: #ffffff;
+      border-right: 1px solid #ddd;
+      padding: 1rem;
+    }
+
+    .sidebar nav a {
+      display: block;
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      color: #6a0dad;
+      text-decoration: none;
+      border-radius: 5px;
+      transition: background 0.2s;
+    }
+
+    .sidebar nav a:hover {
+      background-color: #f0e6ff;
+    }
+
+    .logout {
+      margin-top: 156%;
+      text-align: left;
+    }
+
+    .logout a {
+      color: #6a0dad;
+      text-decoration: none;
+      padding: 0.75rem;
+      border-radius: 5px;
+      transition: background 0.2s;
+    }
+
+    .logout a:hover {
+      background-color: #f0e6ff;
+    }
+
+    .main {
+      flex-grow: 1;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .card {
+      background-color: #fff;
+      padding: 3rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(106, 13, 173, 0.2);
+      max-width: 800px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .card h2 {
+      color: #6a0dad;
+      margin-top: 0;
+      margin-bottom: 1.5rem;
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    /* Loader styling */
+    #loading {
+      font-size: 1.1rem;
+      color: #6a0dad;
+      margin-top: 1rem;
+      display: none;
+    }
+
+    #chart-container {
+    width: 100%;
+    max-width: 1300px;  /* Increased max-width for more space */
+    margin: auto;
+    display: block;
+    }
+
+    canvas {
+    display: block; /* Ensures that the canvas is treated as a block element */
+    width: 100%;    /* Make the canvas take up 100% of the container width */
+    height: auto;   /* Maintain the aspect ratio of the canvas */
+    }
+
+  </style>
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🎮 GameHub Attendance</h1>
+  <div>Welcome, Employee</div>
+</header>
+
+<div class="container">
+  <aside class="sidebar">
+    <nav>
+      <a href="UserMainPage.html">Dashboard</a>
+      <a href="EventRecords.html">View Records</a>
+      <a href="php/employee_leave_form.php">Leave Form</a>
+      <a href="php/employee_OT_form.php">OverTime Form</a>
+      <a href="CPD.html">Event Program</a>
+      <a href="EventRecords.html">Event Records</a>
+    </nav>
+    <div class="logout"><a href="php/Userlogin.php">Logout</a></div>
+  </aside>
+
+  <main class="main">
+    <div class="card">
+      <h2>Event Records Summary</h2>
+      <p id="total-records-text" style="color:#6a0dad; font-weight:600; margin-bottom:1.5rem;"></p>
+
+      <div id="loading">Loading event records...</div>
+
+      <div id="chart-container">
+        <canvas id="eventChart" aria-label="Bar chart showing event records" role="img"></canvas>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+ let eventChart = null;
+
+async function fetchEventRecords() {
+    const loadingEl = document.getElementById('loading');
+    const chartContainer = document.getElementById('chart-container');
+
+    loadingEl.style.display = 'block';
+    chartContainer.style.display = 'none';
+
+    try {
+        // Fetch data from event_records_combined.php
+        const response = await fetch('php/event_records.php'); 
+        if (!response.ok) throw new Error('Network response was not ok');
+        const data = await response.json();
+
+        loadingEl.style.display = 'none';
+        chartContainer.style.display = 'block';
+
+
+        const ctx = document.getElementById('eventChart').getContext('2d');
+
+        if (eventChart) {
+            eventChart.destroy();
+        }
+
+        eventChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.records.map(record => record.category_name), // Categories from the PHP data
+                datasets: [
+                    {
+                        label: 'Target Hours',
+                        data: data.records.map(record => record.target_hours), // Target hours from the PHP data
+                        backgroundColor: 'rgba(106, 13, 173, 0.3)', // 50% transparent for target hours
+                        borderColor: 'rgba(106, 13, 173, 0.5)',
+                        borderWidth: 1,
+                        barThickness: 20,  // Make sure the bar thickness is appropriate
+                    },
+                    {
+                        label: 'Recorded Hours (Actual)',
+                        data: data.records.map(record => record.duration_hours), // Recorded hours
+                        backgroundColor: 'rgba(106, 13, 173, 0.7)', // Purple color for actual hours
+                        borderColor: 'rgba(106, 13, 173, 1)',
+                        borderWidth: 1,
+                        barThickness: 20,  // Same thickness to overlap correctly
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Hours',
+                            font: {
+                                weight: 'bold',
+                                size: 18
+                            },
+                            color: '#6a0dad' // Purple color to match theme
+                        },
+                        ticks: {
+                            precision: 0
+                        },
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Event Categories',
+                            font: {
+                                weight: 'bold',
+                                size: 18
+                            },
+                            color: '#6a0dad',  // Purple color to match theme
+                            align: 'center'    // Center align the title
+                        },
+                        ticks: {
+                            autoSkip: false, // Prevent skipping labels, make sure they're displayed
+                            maxRotation: 25, // Rotate labels for better readability
+                            minRotation: 25,
+                            padding: 10 // Increase padding between labels and axis for more space
+                        }
+                    }
+                },
+                plugins: {
+                    legend: { display: true },
+                    tooltip: { enabled: true }
+                }
+            }
+        });
+
+    } catch (error) {
+        loadingEl.textContent = 'Failed to load event records.';
+        console.error('Error fetching event records:', error);
+    }
+}
+
+window.addEventListener('DOMContentLoaded', fetchEventRecords);
+
+</script>
+
+</body>
+</html>
