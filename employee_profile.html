@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Employee Profile</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background-color: #f8f7fc;
+      color: #333;
+    }
+
+    header {
+      background-color: #6a0dad;
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+
+    .container {
+      display: flex;
+      min-height: calc(100vh - 70px);
+    }
+
+    .sidebar {
+      width: 220px;
+      background-color: #ffffff;
+      border-right: 1px solid #ddd;
+      padding: 1rem;
+    }
+
+    .sidebar nav a {
+      display: block;
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      color: #6a0dad;
+      text-decoration: none;
+      border-radius: 5px;
+      transition: background 0.2s;
+    }
+
+    .sidebar nav a:hover {
+      background-color: #f0e6ff;
+    }
+
+    .logout {
+      margin-top: 186%;
+      text-align: left;
+    }
+
+    .logout a {
+      color: #6a0dad;
+      text-decoration: none;
+      padding: 0.75rem;
+      border-radius: 5px;
+      transition: background 0.2s;
+    }
+
+    .logout a:hover {
+      background-color: #f0e6ff;
+    }
+
+    .main {
+      flex-grow: 1;
+      padding: 2rem;
+    }
+
+    .profile-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .profile-header {
+      background-color: white;
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 15px rgba(106, 13, 173, 0.2);
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    .profile-avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid #6a0dad;
+    }
+
+    .profile-info h2 {
+      color: #6a0dad;
+      margin: 0 0 0.5rem 0;
+    }
+
+    .profile-info p {
+      margin: 0.25rem 0;
+      color: #666;
+    }
+
+    .profile-section {
+      background-color: white;
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 15px rgba(106, 13, 173, 0.2);
+    }
+
+    .profile-section h3 {
+      color: #6a0dad;
+      margin-top: 0;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #f0e6ff;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+    }
+
+    .info-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .info-item label {
+      color: #666;
+      font-size: 0.9rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .info-item span {
+      font-weight: 500;
+    }
+
+    .edit-button {
+      background-color: #6a0dad;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background-color 0.2s;
+    }
+
+    .edit-button:hover {
+      background-color: #5a0bb2;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, #6a0dad, #8a2be2);
+      color: white;
+      padding: 1.5rem;
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    .stat-card h4 {
+      margin: 0 0 0.5rem 0;
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+
+    .stat-card .value {
+      font-size: 2rem;
+      font-weight: bold;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🎮 GameHub Attendance</h1>
+    <div style="display: flex; align-items: center; gap: 1rem;">
+      <img src="image/avatar.png" alt="Avatar" id="headerAvatar" style="width:40px;height:40px;border-radius:50%;border:2px solid #fff;object-fit:cover;">
+      <span style="margin-right: 0.5rem;" id="headerWelcome">Welcome, Employee</span>
+      <button onclick="location.href='edit_profile.html'" style="background:#fff;color:#6a0dad;border:none;padding:0.5rem 1rem;border-radius:5px;cursor:pointer;font-weight:500;transition:background 0.2s;">Edit Profile</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <aside class="sidebar">
+      <nav>
+        <a href="UserMainPage.html">Dashboard</a>
+        <a href="ViewRecords.html">View Records</a>
+        <a href="php/employee_leave_form.php">Leave Form</a>
+        <a href="php/employee_OT_form.php">OverTime Form</a>
+        <a href="CPD.html">CPD Programme</a>
+        <a href="employee_profile.html">My Profile</a>
+      </nav>
+      <div class="logout"><a href="php/Userlogin.php">Logout</a></div>
+    </aside>
+
+    <main class="main">
+      <div class="profile-container">
+        <div class="profile-header">
+          <img src="image/avatar.png" alt="Profile Avatar" class="profile-avatar" id="profileAvatar">
+          <div class="profile-info">
+            <h2 id="profileName">Benajmin Benajmin</h2>
+            <p><strong>Employee ID: </strong><span id="profileEmployeeId">1212</span></p>
+            <p><strong>Email: </strong><span id="profileEmail">myxinzhe.lee@gmail.com</span></p>
+            <p><strong>Registered At: </strong><span id="profileCreatedAt">2025-05-18 06:55:48</span></p>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <h4>Attendance Rate</h4>
+            <p class="value" id="attendanceRate">-</p>
+          </div>
+          <div class="stat-card">
+            <h4>CPD Hours</h4>
+            <p class="value" id="cpdHours">-</p>
+          </div>
+          <div class="stat-card">
+            <h4>Leave Balance</h4>
+            <p class="value" id="leaveBalance">-</p>
+          </div>
+        </div>
+
+        <div class="profile-section">
+          <h3>Personal Information</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <label>Full Name</label>
+              <span>John Doe</span>
+            </div>
+            <div class="info-item">
+              <label>Email</label>
+              <span>john.doe@gamehub.com</span>
+            </div>
+            <div class="info-item">
+              <label>Phone</label>
+              <span>+1 234 567 8900</span>
+            </div>
+            <div class="info-item">
+              <label>Date of Birth</label>
+              <span>January 15, 1990</span>
+            </div>
+            <div class="info-item">
+              <label>Address</label>
+              <span>123 Game Street, Tech City</span>
+            </div>
+            <div class="info-item">
+              <label>Emergency Contact</label>
+              <span>Jane Doe (Spouse) - +1 234 567 8901</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="profile-section">
+          <h3>Employment Details</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <label>Employee ID</label>
+              <span>EMP001</span>
+            </div>
+            <div class="info-item">
+              <label>Department</label>
+              <span>Game Development</span>
+            </div>
+            <div class="info-item">
+              <label>Position</label>
+              <span>Senior Game Developer</span>
+            </div>
+            <div class="info-item">
+              <label>Join Date</label>
+              <span>January 1, 2020</span>
+            </div>
+            <div class="info-item">
+              <label>Employment Type</label>
+              <span>Full-time</span>
+            </div>
+            <div class="info-item">
+              <label>Reporting Manager</label>
+              <span>Sarah Smith</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="profile-section">
+          <h3>Skills & Certifications</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <label>Technical Skills</label>
+              <span>Unity, Unreal Engine, C++, C#, Python</span>
+            </div>
+            <div class="info-item">
+              <label>Certifications</label>
+              <span>Unity Certified Developer, AWS Game Tech</span>
+            </div>
+            <div class="info-item">
+              <label>Languages</label>
+              <span>English (Native), Spanish (Intermediate)</span>
+            </div>
+          </div>
+        </div>
+
+        <button class="edit-button" onclick="window.location.href='edit_profile.html'">Edit Profile</button>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // 假设后端有API: php/get_profile.php，返回JSON
+    fetch('php/get_profile.php')
+      .then(res => res.json())
+      .then(data => {
+        // 加时间戳防止缓存
+        const avatarUrl = data.avatar ? (data.avatar + '?t=' + Date.now()) : 'image/avatar.png';
+        document.getElementById('profileAvatar').src = avatarUrl;
+        document.getElementById('headerAvatar').src = avatarUrl;
+        document.getElementById('profileName').textContent = data.first_name + ' ' + data.last_name;
+        document.getElementById('headerWelcome').textContent = 'Welcome, ' + data.first_name;
+        document.getElementById('profileEmployeeId').textContent = data.employee_id;
+        document.getElementById('profileEmail').textContent = data.email;
+        document.getElementById('profileCreatedAt').textContent = data.created_at;
+        // 联动统计格子
+        document.getElementById('attendanceRate').textContent = (data.attendance_rate !== undefined ? data.attendance_rate + '%' : '-');
+        document.getElementById('cpdHours').textContent = (data.cpd_hours !== undefined ? data.cpd_hours : '-');
+        document.getElementById('leaveBalance').textContent = (data.leave_balance !== undefined ? data.leave_balance : '-');
+      });
+  </script>
+</body>
+</html> 
